@@ -166,7 +166,7 @@ namespace JoshPiler
             }
             // Pass by value
             else 
-            {
+            {//
                 // Parse procedure paramaters (arguments)
                 while (m_tok.m_tokType != Token.TOKENTYPE.RIGHT_PAREN)          // while not )
                     VarDef(m_iScopeLevel, 4, Symbol.PARAMETER_TYPE.VAL_PARM);   // baseoffset for scope starts at 4
