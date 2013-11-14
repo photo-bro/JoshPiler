@@ -814,13 +814,6 @@ namespace JoshPiler
                 //m_Em.movReg("[BP+DI]", "EBX");   // assign value to BP+OFFSET
             }
             //if (c_bParserASMDebug) m_Em.asm(";;;; END ID -- ARRAY");
-            //m_Em.WRLN();
-            //m_Em.WRSTR("Value: ");
-            //m_Em.asm("PutLInt  [BP+DI]");
-            //m_Em.WRSTR("  Offset: ");
-            //m_Em.asm("PutLInt EAX");
-            //m_Em.WRLN();
-
             Match(Token.TOKENTYPE.SEMI_COLON);
         } // ID()
 
