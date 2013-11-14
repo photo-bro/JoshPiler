@@ -159,6 +159,7 @@ namespace JoshPiler
                 m_tok = m_Tknzr.NextToken(); // consume VAR token
                 while (m_tok.m_tokType != Token.TOKENTYPE.RIGHT_PAREN)
                     VarDef(m_iScopeLevel, 4, Symbol.PARAMETER_TYPE.REF_PARM);
+
                 Scope BaseScope = m_SymTable.GetScope(m_SymTable.ActiveScope-1);
                 BaseScope.AddSymbol(new Symbol(m_tok.m_strName, m_iScopeLevel, Symbol.SYMBOL_TYPE.TYPE_PROC,
                 Symbol.STORAGE_TYPE.STORE_NONE, Symbol.PARAMETER_TYPE.REF_PARM, 0));
@@ -680,6 +681,15 @@ namespace JoshPiler
                     // Must push arguments in reverse order
                     for (int i = iArgCount; i > 0; --i)
                     {
+                        // if proc is reference then push just BP-Off not [BP-Off]
+                        if (sym.ParamType == Symbol.PARAMETER_TYPE.REF_PARM)
+                        {
+                            Symbol syRef = FindSymbol(lslsArgs[i][0].m_strName);
+                            m_Em.asm("  movzx EAX, BP     ; mov zero extend");
+                            m_Em.Sub("EAX", syRef.Offset.ToString());
+                            m_Em.pushReg("EAX"); 		   // final address of variable
+
+                        }
                         // Get value into EAX then push onto stack
                         EvalPostFix(InFixToPostFix(lslsArgs[i-1]));
                         m_Em.pushReg("EAX");
