@@ -412,7 +412,6 @@ namespace JoshPiler
                 {
                     // *********************
                     // ***** PROCEDURE ***** 
-                    if (c_bParserASMDebug) m_Em.asm(";;;;;;; PROCEDURE ;;;;;;;;");
                     // skip BEGIN
                     m_tok = m_Tknzr.NextToken();
 
@@ -431,6 +430,9 @@ namespace JoshPiler
                         ErrorHandler.Error(ERROR_CODE.SYMBOL_UNDEFINED, m_tok.m_iLineNum,
                             "Expecting PROCEDURE name");
 
+                    // procedure header
+                    if (c_bParserASMDebug) m_Em.asm(string.Format(";======= PROCEDURE: {0} =======", symProc.Name));
+
                     // Print jump label
                     m_Em.Label(symProc.Name);
 
@@ -440,7 +442,7 @@ namespace JoshPiler
 
                     // Make room for local variables
                     // Get number of local variables
-                    m_Em.asm("; Make room for local variables ;;;;;;;;");
+                    if (c_bParserASMDebug) m_Em.asm("; Make room for local variables ;;;;;;;;");
                     int iArg = 0;
                     foreach (Symbol sym in scpActive.Symbols)
 						if (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR ||
@@ -474,6 +476,9 @@ namespace JoshPiler
 
                     // Print return instruction
                     m_Em.asm("ret     ; Return to calling code");
+
+                    // procedure footer
+                    if (c_bParserASMDebug) m_Em.asm(string.Format(";======= END PROCEDURE: {0} =======", symProc.Name));
 
                     // match end
                     Match(Token.TOKENTYPE.END);

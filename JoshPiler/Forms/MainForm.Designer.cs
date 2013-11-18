@@ -28,12 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.lbSRCfile = new System.Windows.Forms.Label();
-            this.lbMASMdir = new System.Windows.Forms.Label();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openModFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openRecentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.recentFile1ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.recentFile2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.recentFile3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clearRecentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setDefaultFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setMASMDirectoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,11 +49,6 @@
             this.displayErrorConsoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.compileFlagsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnGetChar = new System.Windows.Forms.Button();
-            this.btnResetChar = new System.Windows.Forms.Button();
-            this.lbMASMdirpath = new System.Windows.Forms.Label();
-            this.lbCurFolderDir = new System.Windows.Forms.Label();
-            this.lbCurFolder = new System.Windows.Forms.Label();
             this.tabProcLst = new System.Windows.Forms.TabPage();
             this.lineNumbersForRichText4 = new LineNumbersControlForRichTextBox.LineNumbersForRichText();
             this.richProcListInc = new System.Windows.Forms.RichTextBox();
@@ -67,11 +64,14 @@
             this.lineNumbersForRichText1 = new LineNumbersControlForRichTextBox.LineNumbersForRichText();
             this.richSourceBox = new System.Windows.Forms.RichTextBox();
             this.tabsMain = new System.Windows.Forms.TabControl();
-            this.lbCompileTime = new System.Windows.Forms.Label();
-            this.gbxDir = new System.Windows.Forms.GroupBox();
-            this.recentFile1ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.recentFile2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.recentFile3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.stStatusStrip = new System.Windows.Forms.StatusStrip();
+            this.tsCompileTime = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tsLastError = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tsCurDir = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tsCurFol = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            this.getCharToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resetCharToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabProcLst.SuspendLayout();
             this.tabStrInc.SuspendLayout();
@@ -79,26 +79,8 @@
             this.tabTokens.SuspendLayout();
             this.tabSRCview.SuspendLayout();
             this.tabsMain.SuspendLayout();
+            this.stStatusStrip.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // lbSRCfile
-            // 
-            this.lbSRCfile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lbSRCfile.AutoSize = true;
-            this.lbSRCfile.Location = new System.Drawing.Point(114, 545);
-            this.lbSRCfile.Name = "lbSRCfile";
-            this.lbSRCfile.Size = new System.Drawing.Size(0, 13);
-            this.lbSRCfile.TabIndex = 4;
-            // 
-            // lbMASMdir
-            // 
-            this.lbMASMdir.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lbMASMdir.AutoSize = true;
-            this.lbMASMdir.Location = new System.Drawing.Point(16, 549);
-            this.lbMASMdir.Name = "lbMASMdir";
-            this.lbMASMdir.Size = new System.Drawing.Size(90, 13);
-            this.lbMASMdir.TabIndex = 6;
-            this.lbMASMdir.Text = "MASM Directory: ";
             // 
             // menuStrip1
             // 
@@ -146,18 +128,42 @@
             this.openRecentToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
             this.openRecentToolStripMenuItem.Text = "Open Recent";
             // 
+            // recentFile1ToolStripMenuItem
+            // 
+            this.recentFile1ToolStripMenuItem.Name = "recentFile1ToolStripMenuItem";
+            this.recentFile1ToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.recentFile1ToolStripMenuItem.Text = "Recent_1";
+            this.recentFile1ToolStripMenuItem.Visible = false;
+            this.recentFile1ToolStripMenuItem.Click += new System.EventHandler(this.recentFile1ToolStripMenuItem_Click);
+            // 
+            // recentFile2ToolStripMenuItem
+            // 
+            this.recentFile2ToolStripMenuItem.Name = "recentFile2ToolStripMenuItem";
+            this.recentFile2ToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.recentFile2ToolStripMenuItem.Text = "Recent_2";
+            this.recentFile2ToolStripMenuItem.Visible = false;
+            this.recentFile2ToolStripMenuItem.Click += new System.EventHandler(this.recentFile2ToolStripMenuItem_Click);
+            // 
+            // recentFile3ToolStripMenuItem
+            // 
+            this.recentFile3ToolStripMenuItem.Name = "recentFile3ToolStripMenuItem";
+            this.recentFile3ToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.recentFile3ToolStripMenuItem.Text = "Recent_3";
+            this.recentFile3ToolStripMenuItem.Visible = false;
+            this.recentFile3ToolStripMenuItem.Click += new System.EventHandler(this.recentFile3ToolStripMenuItem_Click);
+            // 
             // clearRecentToolStripMenuItem
             // 
             this.clearRecentToolStripMenuItem.Name = "clearRecentToolStripMenuItem";
-            this.clearRecentToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.clearRecentToolStripMenuItem.Size = new System.Drawing.Size(140, 22);
             this.clearRecentToolStripMenuItem.Text = "Clear Recent";
             this.clearRecentToolStripMenuItem.Click += new System.EventHandler(this.clearRecentToolStripMenuItem_Click);
             // 
             // setDefaultFolderToolStripMenuItem
             // 
             this.setDefaultFolderToolStripMenuItem.Name = "setDefaultFolderToolStripMenuItem";
-            this.setDefaultFolderToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt) 
-            | System.Windows.Forms.Keys.M)));
+            this.setDefaultFolderToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt)
+                        | System.Windows.Forms.Keys.M)));
             this.setDefaultFolderToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
             this.setDefaultFolderToolStripMenuItem.Text = "Set Default Folder";
             this.setDefaultFolderToolStripMenuItem.Click += new System.EventHandler(this.setDefaultFolderToolStripMenuItem_Click);
@@ -173,8 +179,8 @@
             // saveErrorLogToolStripMenuItem
             // 
             this.saveErrorLogToolStripMenuItem.Name = "saveErrorLogToolStripMenuItem";
-            this.saveErrorLogToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
-            | System.Windows.Forms.Keys.S)));
+            this.saveErrorLogToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+                        | System.Windows.Forms.Keys.S)));
             this.saveErrorLogToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
             this.saveErrorLogToolStripMenuItem.Text = "Save Error Log";
             this.saveErrorLogToolStripMenuItem.Click += new System.EventHandler(this.saveErrorLogToolStripMenuItem_Click);
@@ -225,8 +231,8 @@
             // testSymbolTableToolStripMenuItem
             // 
             this.testSymbolTableToolStripMenuItem.Name = "testSymbolTableToolStripMenuItem";
-            this.testSymbolTableToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt) 
-            | System.Windows.Forms.Keys.S)));
+            this.testSymbolTableToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt)
+                        | System.Windows.Forms.Keys.S)));
             this.testSymbolTableToolStripMenuItem.Size = new System.Drawing.Size(234, 22);
             this.testSymbolTableToolStripMenuItem.Text = "Test Symbol Table";
             this.testSymbolTableToolStripMenuItem.Click += new System.EventHandler(this.testSymbolTableToolStripMenuItem_Click);
@@ -255,65 +261,13 @@
             this.compileFlagsToolStripMenuItem.Text = "Compile Flags";
             this.compileFlagsToolStripMenuItem.Click += new System.EventHandler(this.compileFlagsToolStripMenuItem_Click);
             // 
-            // btnGetChar
-            // 
-            this.btnGetChar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnGetChar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnGetChar.Location = new System.Drawing.Point(634, 568);
-            this.btnGetChar.Name = "btnGetChar";
-            this.btnGetChar.Size = new System.Drawing.Size(74, 21);
-            this.btnGetChar.TabIndex = 10;
-            this.btnGetChar.Text = "Get Char";
-            this.btnGetChar.UseVisualStyleBackColor = true;
-            this.btnGetChar.Click += new System.EventHandler(this.btnGetChar_Click);
-            // 
-            // btnResetChar
-            // 
-            this.btnResetChar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnResetChar.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnResetChar.Location = new System.Drawing.Point(714, 567);
-            this.btnResetChar.Name = "btnResetChar";
-            this.btnResetChar.Size = new System.Drawing.Size(74, 21);
-            this.btnResetChar.TabIndex = 11;
-            this.btnResetChar.Text = "Reset Char";
-            this.btnResetChar.UseVisualStyleBackColor = true;
-            this.btnResetChar.Click += new System.EventHandler(this.btnResetChar_Click);
-            // 
-            // lbMASMdirpath
-            // 
-            this.lbMASMdirpath.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lbMASMdirpath.AutoSize = true;
-            this.lbMASMdirpath.Location = new System.Drawing.Point(114, 549);
-            this.lbMASMdirpath.Name = "lbMASMdirpath";
-            this.lbMASMdirpath.Size = new System.Drawing.Size(0, 13);
-            this.lbMASMdirpath.TabIndex = 13;
-            // 
-            // lbCurFolderDir
-            // 
-            this.lbCurFolderDir.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lbCurFolderDir.AutoSize = true;
-            this.lbCurFolderDir.Location = new System.Drawing.Point(114, 568);
-            this.lbCurFolderDir.Name = "lbCurFolderDir";
-            this.lbCurFolderDir.Size = new System.Drawing.Size(0, 13);
-            this.lbCurFolderDir.TabIndex = 15;
-            // 
-            // lbCurFolder
-            // 
-            this.lbCurFolder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lbCurFolder.AutoSize = true;
-            this.lbCurFolder.Location = new System.Drawing.Point(16, 568);
-            this.lbCurFolder.Name = "lbCurFolder";
-            this.lbCurFolder.Size = new System.Drawing.Size(76, 13);
-            this.lbCurFolder.TabIndex = 14;
-            this.lbCurFolder.Text = "Current Folder:";
-            // 
             // tabProcLst
             // 
             this.tabProcLst.Controls.Add(this.lineNumbersForRichText4);
             this.tabProcLst.Controls.Add(this.richProcListInc);
             this.tabProcLst.Location = new System.Drawing.Point(4, 22);
             this.tabProcLst.Name = "tabProcLst";
-            this.tabProcLst.Size = new System.Drawing.Size(768, 476);
+            this.tabProcLst.Size = new System.Drawing.Size(768, 514);
             this.tabProcLst.TabIndex = 4;
             this.tabProcLst.Text = "proclist.inc";
             this.tabProcLst.UseVisualStyleBackColor = true;
@@ -353,20 +307,20 @@
             this.lineNumbersForRichText4.ShowGridLines = false;
             this.lineNumbersForRichText4.ShowLineNumbers = true;
             this.lineNumbersForRichText4.ShowMarginLines = true;
-            this.lineNumbersForRichText4.Size = new System.Drawing.Size(20, 470);
+            this.lineNumbersForRichText4.Size = new System.Drawing.Size(20, 508);
             this.lineNumbersForRichText4.TabIndex = 4;
             // 
             // richProcListInc
             // 
-            this.richProcListInc.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.richProcListInc.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.richProcListInc.BackColor = System.Drawing.Color.White;
             this.richProcListInc.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richProcListInc.Location = new System.Drawing.Point(44, 3);
             this.richProcListInc.Name = "richProcListInc";
             this.richProcListInc.ReadOnly = true;
-            this.richProcListInc.Size = new System.Drawing.Size(721, 470);
+            this.richProcListInc.Size = new System.Drawing.Size(721, 508);
             this.richProcListInc.TabIndex = 3;
             this.richProcListInc.Text = "";
             // 
@@ -376,7 +330,7 @@
             this.tabStrInc.Controls.Add(this.richStringInc);
             this.tabStrInc.Location = new System.Drawing.Point(4, 22);
             this.tabStrInc.Name = "tabStrInc";
-            this.tabStrInc.Size = new System.Drawing.Size(768, 476);
+            this.tabStrInc.Size = new System.Drawing.Size(768, 514);
             this.tabStrInc.TabIndex = 3;
             this.tabStrInc.Text = "string.inc";
             this.tabStrInc.UseVisualStyleBackColor = true;
@@ -416,20 +370,20 @@
             this.lineNumbersForRichText3.ShowGridLines = false;
             this.lineNumbersForRichText3.ShowLineNumbers = true;
             this.lineNumbersForRichText3.ShowMarginLines = true;
-            this.lineNumbersForRichText3.Size = new System.Drawing.Size(20, 470);
+            this.lineNumbersForRichText3.Size = new System.Drawing.Size(20, 508);
             this.lineNumbersForRichText3.TabIndex = 4;
             // 
             // richStringInc
             // 
-            this.richStringInc.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.richStringInc.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.richStringInc.BackColor = System.Drawing.Color.White;
             this.richStringInc.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richStringInc.Location = new System.Drawing.Point(35, 3);
             this.richStringInc.Name = "richStringInc";
             this.richStringInc.ReadOnly = true;
-            this.richStringInc.Size = new System.Drawing.Size(730, 470);
+            this.richStringInc.Size = new System.Drawing.Size(730, 508);
             this.richStringInc.TabIndex = 3;
             this.richStringInc.Text = "";
             // 
@@ -438,22 +392,22 @@
             this.tabSymTabl.Controls.Add(this.richSymTable);
             this.tabSymTabl.Location = new System.Drawing.Point(4, 22);
             this.tabSymTabl.Name = "tabSymTabl";
-            this.tabSymTabl.Size = new System.Drawing.Size(768, 476);
+            this.tabSymTabl.Size = new System.Drawing.Size(768, 514);
             this.tabSymTabl.TabIndex = 2;
             this.tabSymTabl.Text = "Symbol Table";
             this.tabSymTabl.UseVisualStyleBackColor = true;
             // 
             // richSymTable
             // 
-            this.richSymTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.richSymTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.richSymTable.BackColor = System.Drawing.Color.White;
             this.richSymTable.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richSymTable.Location = new System.Drawing.Point(3, 3);
             this.richSymTable.Name = "richSymTable";
             this.richSymTable.ReadOnly = true;
-            this.richSymTable.Size = new System.Drawing.Size(761, 470);
+            this.richSymTable.Size = new System.Drawing.Size(761, 508);
             this.richSymTable.TabIndex = 4;
             this.richSymTable.Text = "";
             // 
@@ -464,7 +418,7 @@
             this.tabTokens.Location = new System.Drawing.Point(4, 22);
             this.tabTokens.Name = "tabTokens";
             this.tabTokens.Padding = new System.Windows.Forms.Padding(3);
-            this.tabTokens.Size = new System.Drawing.Size(768, 476);
+            this.tabTokens.Size = new System.Drawing.Size(768, 514);
             this.tabTokens.TabIndex = 1;
             this.tabTokens.Text = "Token List";
             this.tabTokens.UseVisualStyleBackColor = true;
@@ -504,20 +458,20 @@
             this.lineNumbersForRichText2.ShowGridLines = false;
             this.lineNumbersForRichText2.ShowLineNumbers = true;
             this.lineNumbersForRichText2.ShowMarginLines = true;
-            this.lineNumbersForRichText2.Size = new System.Drawing.Size(20, 470);
+            this.lineNumbersForRichText2.Size = new System.Drawing.Size(20, 508);
             this.lineNumbersForRichText2.TabIndex = 4;
             // 
             // richToken
             // 
-            this.richToken.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.richToken.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.richToken.BackColor = System.Drawing.Color.White;
             this.richToken.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richToken.Location = new System.Drawing.Point(34, 3);
             this.richToken.Name = "richToken";
             this.richToken.ReadOnly = true;
-            this.richToken.Size = new System.Drawing.Size(730, 470);
+            this.richToken.Size = new System.Drawing.Size(730, 508);
             this.richToken.TabIndex = 3;
             this.richToken.Text = "";
             // 
@@ -528,7 +482,7 @@
             this.tabSRCview.Location = new System.Drawing.Point(4, 22);
             this.tabSRCview.Name = "tabSRCview";
             this.tabSRCview.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSRCview.Size = new System.Drawing.Size(768, 476);
+            this.tabSRCview.Size = new System.Drawing.Size(768, 514);
             this.tabSRCview.TabIndex = 0;
             this.tabSRCview.Text = "Source";
             this.tabSRCview.UseVisualStyleBackColor = true;
@@ -568,28 +522,28 @@
             this.lineNumbersForRichText1.ShowGridLines = false;
             this.lineNumbersForRichText1.ShowLineNumbers = true;
             this.lineNumbersForRichText1.ShowMarginLines = true;
-            this.lineNumbersForRichText1.Size = new System.Drawing.Size(20, 470);
+            this.lineNumbersForRichText1.Size = new System.Drawing.Size(20, 508);
             this.lineNumbersForRichText1.TabIndex = 2;
             // 
             // richSourceBox
             // 
-            this.richSourceBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.richSourceBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.richSourceBox.BackColor = System.Drawing.Color.White;
             this.richSourceBox.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richSourceBox.Location = new System.Drawing.Point(34, 3);
             this.richSourceBox.Name = "richSourceBox";
             this.richSourceBox.ReadOnly = true;
-            this.richSourceBox.Size = new System.Drawing.Size(730, 470);
+            this.richSourceBox.Size = new System.Drawing.Size(730, 508);
             this.richSourceBox.TabIndex = 1;
             this.richSourceBox.Text = "";
             // 
             // tabsMain
             // 
-            this.tabsMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabsMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.tabsMain.Controls.Add(this.tabSRCview);
             this.tabsMain.Controls.Add(this.tabTokens);
             this.tabsMain.Controls.Add(this.tabSymTabl);
@@ -598,74 +552,90 @@
             this.tabsMain.Location = new System.Drawing.Point(12, 35);
             this.tabsMain.Name = "tabsMain";
             this.tabsMain.SelectedIndex = 0;
-            this.tabsMain.Size = new System.Drawing.Size(776, 502);
+            this.tabsMain.Size = new System.Drawing.Size(776, 540);
             this.tabsMain.TabIndex = 0;
             // 
-            // lbCompileTime
+            // stStatusStrip
             // 
-            this.lbCompileTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.lbCompileTime.AutoSize = true;
-            this.lbCompileTime.Location = new System.Drawing.Point(491, 545);
-            this.lbCompileTime.Name = "lbCompileTime";
-            this.lbCompileTime.Size = new System.Drawing.Size(76, 13);
-            this.lbCompileTime.TabIndex = 16;
-            this.lbCompileTime.Text = "Compile Time: ";
+            this.stStatusStrip.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.stStatusStrip.AutoSize = false;
+            this.stStatusStrip.Dock = System.Windows.Forms.DockStyle.None;
+            this.stStatusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsCompileTime,
+            this.tsLastError,
+            this.tsCurDir,
+            this.tsCurFol,
+            this.toolStripDropDownButton1});
+            this.stStatusStrip.Location = new System.Drawing.Point(0, 578);
+            this.stStatusStrip.Name = "stStatusStrip";
+            this.stStatusStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
+            this.stStatusStrip.Size = new System.Drawing.Size(800, 22);
+            this.stStatusStrip.TabIndex = 18;
+            this.stStatusStrip.Text = "statusStrip1";
             // 
-            // gbxDir
+            // tsCompileTime
             // 
-            this.gbxDir.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.gbxDir.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.gbxDir.Location = new System.Drawing.Point(12, 536);
-            this.gbxDir.Name = "gbxDir";
-            this.gbxDir.Size = new System.Drawing.Size(457, 53);
-            this.gbxDir.TabIndex = 17;
-            this.gbxDir.TabStop = false;
+            this.tsCompileTime.Name = "tsCompileTime";
+            this.tsCompileTime.Size = new System.Drawing.Size(88, 17);
+            this.tsCompileTime.Text = "Compile Time: ";
             // 
-            // recentFile1ToolStripMenuItem
+            // tsLastError
             // 
-            this.recentFile1ToolStripMenuItem.Name = "recentFile1ToolStripMenuItem";
-            this.recentFile1ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.recentFile1ToolStripMenuItem.Text = "Recent_1";
-            this.recentFile1ToolStripMenuItem.Visible = false;
-            this.recentFile1ToolStripMenuItem.Click += new System.EventHandler(this.recentFile1ToolStripMenuItem_Click);
+            this.tsLastError.Name = "tsLastError";
+            this.tsLastError.Size = new System.Drawing.Size(59, 17);
+            this.tsLastError.Text = "Last Error:";
             // 
-            // recentFile2ToolStripMenuItem
+            // tsCurDir
             // 
-            this.recentFile2ToolStripMenuItem.Name = "recentFile2ToolStripMenuItem";
-            this.recentFile2ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.recentFile2ToolStripMenuItem.Text = "Recent_2";
-            this.recentFile2ToolStripMenuItem.Visible = false;
-            this.recentFile2ToolStripMenuItem.Click += new System.EventHandler(this.recentFile2ToolStripMenuItem_Click);
+            this.tsCurDir.Name = "tsCurDir";
+            this.tsCurDir.Size = new System.Drawing.Size(64, 17);
+            this.tsCurDir.Text = "MASM Dir:";
             // 
-            // recentFile3ToolStripMenuItem
+            // tsCurFol
             // 
-            this.recentFile3ToolStripMenuItem.Name = "recentFile3ToolStripMenuItem";
-            this.recentFile3ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.recentFile3ToolStripMenuItem.Text = "Recent_3";
-            this.recentFile3ToolStripMenuItem.Visible = false;
-            this.recentFile3ToolStripMenuItem.Click += new System.EventHandler(this.recentFile3ToolStripMenuItem_Click);
+            this.tsCurFol.Name = "tsCurFol";
+            this.tsCurFol.Size = new System.Drawing.Size(43, 17);
+            this.tsCurFol.Text = "Folder:";
+            // 
+            // toolStripDropDownButton1
+            // 
+            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.getCharToolStripMenuItem,
+            this.resetCharToolStripMenuItem});
+            this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
+            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(29, 20);
+            this.toolStripDropDownButton1.Text = "Char";
+            // 
+            // getCharToolStripMenuItem
+            // 
+            this.getCharToolStripMenuItem.Name = "getCharToolStripMenuItem";
+            this.getCharToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
+            this.getCharToolStripMenuItem.Text = "Get Char";
+            this.getCharToolStripMenuItem.Click += new System.EventHandler(this.getCharToolStripMenuItem_Click);
+            // 
+            // resetCharToolStripMenuItem
+            // 
+            this.resetCharToolStripMenuItem.Name = "resetCharToolStripMenuItem";
+            this.resetCharToolStripMenuItem.Size = new System.Drawing.Size(130, 22);
+            this.resetCharToolStripMenuItem.Text = "Reset Char";
+            this.resetCharToolStripMenuItem.Click += new System.EventHandler(this.resetCharToolStripMenuItem_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 600);
-            this.Controls.Add(this.lbCompileTime);
-            this.Controls.Add(this.lbCurFolderDir);
-            this.Controls.Add(this.lbCurFolder);
-            this.Controls.Add(this.lbMASMdirpath);
-            this.Controls.Add(this.btnResetChar);
-            this.Controls.Add(this.btnGetChar);
-            this.Controls.Add(this.lbMASMdir);
-            this.Controls.Add(this.lbSRCfile);
+            this.Controls.Add(this.stStatusStrip);
             this.Controls.Add(this.tabsMain);
             this.Controls.Add(this.menuStrip1);
-            this.Controls.Add(this.gbxDir);
             this.MainMenuStrip = this.menuStrip1;
-            this.MinimumSize = new System.Drawing.Size(800, 600);
+            this.MinimumSize = new System.Drawing.Size(816, 638);
             this.Name = "MainForm";
             this.Text = "JoshPiler";
-            this.Load += new System.EventHandler(this.MainForm_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.tabProcLst.ResumeLayout(false);
@@ -674,6 +644,8 @@
             this.tabTokens.ResumeLayout(false);
             this.tabSRCview.ResumeLayout(false);
             this.tabsMain.ResumeLayout(false);
+            this.stStatusStrip.ResumeLayout(false);
+            this.stStatusStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -681,22 +653,15 @@
 
         #endregion
 
-        private System.Windows.Forms.Label lbSRCfile;
-        private System.Windows.Forms.Label lbMASMdir;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openModFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem quitToolStripMenuItem;
-        private System.Windows.Forms.Button btnGetChar;
-        private System.Windows.Forms.Button btnResetChar;
         private System.Windows.Forms.ToolStripMenuItem setMASMDirectoryToolStripMenuItem;
-        private System.Windows.Forms.Label lbMASMdirpath;
         private System.Windows.Forms.ToolStripMenuItem actionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showTokenListToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem testSymbolTableToolStripMenuItem;
-        private System.Windows.Forms.Label lbCurFolderDir;
-        private System.Windows.Forms.Label lbCurFolder;
         private System.Windows.Forms.ToolStripMenuItem setDefaultFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem compileFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveErrorLogToolStripMenuItem;
@@ -718,13 +683,19 @@
         private LineNumbersControlForRichTextBox.LineNumbersForRichText lineNumbersForRichText2;
         private System.Windows.Forms.RichTextBox richToken;
         private System.Windows.Forms.RichTextBox richSymTable;
-        private System.Windows.Forms.Label lbCompileTime;
-        private System.Windows.Forms.GroupBox gbxDir;
         private System.Windows.Forms.ToolStripMenuItem openRecentToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem clearRecentToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem recentFile1ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem recentFile2ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem recentFile3ToolStripMenuItem;
+        private System.Windows.Forms.StatusStrip stStatusStrip;
+        private System.Windows.Forms.ToolStripStatusLabel tsCompileTime;
+        private System.Windows.Forms.ToolStripStatusLabel tsLastError;
+        private System.Windows.Forms.ToolStripStatusLabel tsCurDir;
+        private System.Windows.Forms.ToolStripStatusLabel tsCurFol;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
+        private System.Windows.Forms.ToolStripMenuItem getCharToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resetCharToolStripMenuItem;
     }
 }
 

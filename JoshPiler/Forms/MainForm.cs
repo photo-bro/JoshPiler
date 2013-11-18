@@ -57,11 +57,21 @@ namespace JoshPiler
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnGetChar_Click(object sender, EventArgs e)
+        private void getCharToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show(
-                string.Format("The next char is: {0}\r\nLine number is: {1}", m_Facade.getChar(), GetChar.Instance.LineCount));
-        } // btnGetChar_Click
+              string.Format("The next char is: {0}\r\nLine number is: {1}", m_Facade.getChar(), GetChar.Instance.LineCount));
+        }
+
+        /// <summary>
+        /// Reset Button
+        /// Reset's position of the GetChar function to beginning of the active file
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void resetCharToolStripMenuItem_Click(object sender, EventArgs e)
+        { m_Facade.resetChar(); }
+
 
         /// <summary>
         /// Open Modula-2 File menu item
@@ -102,15 +112,6 @@ namespace JoshPiler
         } // openModFile
 
         /// <summary>
-        /// Reset Button
-        /// Reset's position of the GetChar function to beginning of the active file
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnResetChar_Click(object sender, EventArgs e)
-        { m_Facade.resetChar(); }
-
-        /// <summary>
         /// Quit menu item
         /// Exits the program 
         /// </summary>
@@ -141,7 +142,7 @@ namespace JoshPiler
 
                 string sTemp = fbdTemp.SelectedPath;
                 FileManager.Instance.MASMdir = sTemp;
-                lbMASMdirpath.Text = sTemp;
+                UpdateGUI();
             } // if OK
         } // setMasmDirectory
 
@@ -203,11 +204,12 @@ namespace JoshPiler
             richStringInc.Text = m_Facade.GetStringInc();
             richProcListInc.Text = m_Facade.GetProclistInc();
 
-            // MASM directory
-            lbMASMdirpath.Text = m_FM.MASMdir;
+            // status strip
+            tsCompileTime.Text = "Compile Time: " + m_Facade.CompileTime.TotalMilliseconds + " ms  ";
+            tsLastError.Text = "Last Error: " + ErrorHandler.LastError.ToString() + "  ";
+            tsCurDir.Text = "MASM Dir: " + m_FM.MASMdir + "  ";
+            tsCurFol.Text = "Current Dir: " + m_FM.LastFilePath + "\\" + m_FM.getFolderName() + "  ";
 
-            // Current Folder directory
-            lbCurFolderDir.Text = m_FM.LastFilePath + "\\" + m_FM.getFolderName();
 
             // Recent opened files
             if (m_lsRecentFiles.Count > 0)
@@ -238,14 +240,6 @@ namespace JoshPiler
                 } // foreach recent file
             } // recent file
         } // UpdateGUI
-
-        /// <summary>
-        /// Not implemented
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void MainForm_Load(object sender, EventArgs e)
-        { }
 
         /// <summary>
         /// ShowTokenList menu item
@@ -317,9 +311,6 @@ namespace JoshPiler
             {
                 m_Facade.CompileFile();
 
-                // display compile time
-                lbCompileTime.Text = "Compile Time: " + m_Facade.CompileTime.TotalMilliseconds
-                    + " milliseconds";
                 // for Tokens tab
                 m_Facade.TokenizeFile();
 

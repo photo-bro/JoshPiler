@@ -26,7 +26,7 @@ namespace JoshPiler
         // Default paths and filenames
         private string m_sMASMdir = "F:\\Compilers\\MASM32";
         private string m_sLastFilePath = "F:\\Compilers\\MODS";
-        private string m_sLastFileName = "17_RefPass.mod";
+        private string m_sLastFileName = "15_IfTest.mod";
 
         // Main Proc name
         private string m_sMainProc = "PJoshPiler_Main";
