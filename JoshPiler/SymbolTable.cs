@@ -16,7 +16,7 @@ namespace JoshPiler
         /// Enumerator categorizing type of Symbol
         /// </summary>
         public enum SYMBOL_TYPE
-        { TYPE_SIMPLE = 0, TYPE_CONST, TYPE_ARRAY, TYPE_PROC }
+        { TYPE_SIMPLE = 0, TYPE_CONST, TYPE_ARRAY, TYPE_PROC, TYPE_REFPROC }
 
         /// <summary>
         /// Enumerator categorizing storage type of Symbol
