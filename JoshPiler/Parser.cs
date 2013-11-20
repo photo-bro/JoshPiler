@@ -11,7 +11,7 @@ namespace JoshPiler
         private static Parser c_parInstance;
 
         // lock object
-        private static object c_parLock = new Object();
+        private static object c_parLock = new object();
 
         // SymbolTable instance
         private SymbolTable m_SymTable = SymbolTable.Instance;
@@ -141,12 +141,14 @@ namespace JoshPiler
             if (procSym != null)
                 ErrorHandler.Error(ERROR_CODE.PROC_REDECLARATION, m_tok.m_iLineNum, "PROCEDURE already declared");
 
-            // Add PROC to symbol table
-            m_SymTable.AddSymbol(new Symbol(m_tok.m_strName, m_iScopeLevel, Symbol.SYMBOL_TYPE.TYPE_PROC,
-                Symbol.STORAGE_TYPE.STORE_NONE, Symbol.PARAMETER_TYPE.LOCAL_VAR, 0));
+            Token tkProcID = m_tok; // save proc ID
 
-            // Create new scope for procedure
-            m_SymTable.AddScope();
+            //// Add PROC to symbol table
+            //m_SymTable.AddSymbol(new Symbol(m_tok.m_strName, m_iScopeLevel, Symbol.SYMBOL_TYPE.TYPE_PROC,
+            //    Symbol.STORAGE_TYPE.STORE_NONE, Symbol.PARAMETER_TYPE.LOCAL_VAR, 0));
+
+            //// Create new scope for procedure
+            //m_SymTable.AddScope();
 
             // Consume ID token
             m_tok = m_Tknzr.NextToken();
@@ -154,19 +156,35 @@ namespace JoshPiler
             Match(Token.TOKENTYPE.LEFT_PAREN);
 
             // check for passed by reference
+            //  if VAR token exists then parameters are reference types
             if (m_tok.m_tokType == Token.TOKENTYPE.VAR)
             {
+
+                // Add PROC to symbol table
+                m_SymTable.AddSymbol(new Symbol(tkProcID.m_strName, m_iScopeLevel, Symbol.SYMBOL_TYPE.TYPE_REFPROC,
+                    Symbol.STORAGE_TYPE.STORE_NONE, Symbol.PARAMETER_TYPE.LOCAL_VAR, 0));
+
+                // Create new scope for procedure
+                m_SymTable.AddScope();
+
+
                 m_tok = m_Tknzr.NextToken(); // consume VAR token
                 while (m_tok.m_tokType != Token.TOKENTYPE.RIGHT_PAREN)
                     VarDef(m_iScopeLevel, 4, Symbol.PARAMETER_TYPE.REF_PARM);
 
-                Scope BaseScope = m_SymTable.GetScope(m_SymTable.ActiveScope-1);
-                BaseScope.AddSymbol(new Symbol(m_tok.m_strName, m_iScopeLevel, Symbol.SYMBOL_TYPE.TYPE_PROC,
-                Symbol.STORAGE_TYPE.STORE_NONE, Symbol.PARAMETER_TYPE.REF_PARM, 0));
+                // Add Proc sym with new SYMBOL_TYPE so that we know the parameters are of reference type
+                //  in the ID() function. Do so by overwriting the symbol
             }
             // Pass by value
             else 
-            {// comment
+            {
+                // Add PROC to symbol table
+                m_SymTable.AddSymbol(new Symbol(tkProcID.m_strName, m_iScopeLevel, Symbol.SYMBOL_TYPE.TYPE_REFPROC,
+                    Symbol.STORAGE_TYPE.STORE_NONE, Symbol.PARAMETER_TYPE.LOCAL_VAR, 0));
+
+                // Create new scope for procedure
+                m_SymTable.AddScope();
+
                 // Parse procedure paramaters (arguments)
                 while (m_tok.m_tokType != Token.TOKENTYPE.RIGHT_PAREN)          // while not )
                     VarDef(m_iScopeLevel, 4, Symbol.PARAMETER_TYPE.VAL_PARM);   // baseoffset for scope starts at 4
@@ -420,7 +438,7 @@ namespace JoshPiler
                     Scope scpCalling = m_SymTable.GetScope(m_iScopeLevel - 1);
                     Symbol symProc = null;
                     foreach (Symbol sym in scpCalling.Symbols)
-                        if (sym.SymType == Symbol.SYMBOL_TYPE.TYPE_PROC)
+                        if (sym.SymType == Symbol.SYMBOL_TYPE.TYPE_PROC || sym.SymType == Symbol.SYMBOL_TYPE.TYPE_REFPROC)
                         {
                             symProc = sym;
                             break;
@@ -663,6 +681,7 @@ namespace JoshPiler
                 case Symbol.SYMBOL_TYPE.TYPE_CONST:
                     ErrorHandler.Error(ERROR_CODE.CONST_REDEFINITION, m_tok.m_iLineNum, "Cannot redefine a CONST value");
                     return; // get out of function
+                case Symbol.SYMBOL_TYPE.TYPE_REFPROC:
                 case Symbol.SYMBOL_TYPE.TYPE_PROC:
                     // ***** PROCEDURE ***** //
                     // Parse argument list, pushing each value onto the stack
@@ -672,7 +691,7 @@ namespace JoshPiler
                     Match(Token.TOKENTYPE.LEFT_PAREN);
 
                     // Parse arguments and prep for procedure call
-                    List<List<Token>> lslsArgs = new List<List<Token>>(); // hold the arguments
+                    List<List<Token>> lslsArgs = new List<List<Token>>(); // hold the arguments, list of token (expression) lists
                     for (; m_tok.m_tokType != Token.TOKENTYPE.SEMI_COLON; m_tok = m_Tknzr.NextToken())
                     {
                         // parse argument into EAX
@@ -687,13 +706,13 @@ namespace JoshPiler
                     for (int i = iArgCount; i > 0; --i)
                     {
                         // if proc is reference then push just BP-Off not [BP-Off]
-                        if (sym.ParamType == Symbol.PARAMETER_TYPE.REF_PARM)
+                        if (sym.SymType == Symbol.SYMBOL_TYPE.TYPE_REFPROC)
                         {
-                            Symbol syRef = FindSymbol(lslsArgs[i][0].m_strName);
+                            Symbol syRef = FindSymbol(lslsArgs[i-1][0].m_strName);
                             m_Em.asm("  movzx EAX, BP     ; mov zero extend");
                             m_Em.Sub("EAX", syRef.Offset.ToString());
                             m_Em.pushReg("EAX"); 		   // final address of variable
-
+                            continue;
                         }
                         // Get value into EAX then push onto stack
                         EvalPostFix(InFixToPostFix(lslsArgs[i-1]));
@@ -1339,7 +1358,7 @@ namespace JoshPiler
                                             //  where instead of the value of the variable being stored
                                             //  at BP+off it is the address
                                             m_Em.movReg("EBX", string.Format("[BP+{0}]", sym.Offset));
-                                            m_Em.movReg("EAX", "[EBX]"); // store value at absolute address in EAX
+                                            m_Em.movReg("EAX", "[EBX]");  // store value at absolute address in EAX
                                             m_Em.pushReg("EAX"); 		  // push value 
                                             break;
                                         default:
