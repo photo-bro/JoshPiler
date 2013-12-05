@@ -81,10 +81,13 @@ namespace JoshPiler
             m_iArithmeticLevel = 0;
 
             m_tok = m_Tknzr.NextToken();
+
+            // Force jump to main when first run
+            m_Em.Jump("jmp", "__MAIN");
+
             // Loop through file
             while (m_tok.m_tokType != Token.TOKENTYPE.EOF || m_tok == null)
             {
-
                 Module();
                 while (m_tok.m_tokType != Token.TOKENTYPE.BEGIN)
                 {
@@ -143,13 +146,6 @@ namespace JoshPiler
 
             Token tkProcID = m_tok; // save proc ID
 
-            //// Add PROC to symbol table
-            //m_SymTable.AddSymbol(new Symbol(m_tok.m_strName, m_iScopeLevel, Symbol.SYMBOL_TYPE.TYPE_PROC,
-            //    Symbol.STORAGE_TYPE.STORE_NONE, Symbol.PARAMETER_TYPE.LOCAL_VAR, 0));
-
-            //// Create new scope for procedure
-            //m_SymTable.AddScope();
-
             // Consume ID token
             m_tok = m_Tknzr.NextToken();
 
@@ -179,7 +175,7 @@ namespace JoshPiler
             else 
             {
                 // Add PROC to symbol table
-                m_SymTable.AddSymbol(new Symbol(tkProcID.m_strName, m_iScopeLevel, Symbol.SYMBOL_TYPE.TYPE_REFPROC,
+                m_SymTable.AddSymbol(new Symbol(tkProcID.m_strName, m_iScopeLevel, Symbol.SYMBOL_TYPE.TYPE_PROC,
                     Symbol.STORAGE_TYPE.STORE_NONE, Symbol.PARAMETER_TYPE.LOCAL_VAR, 0));
 
                 // Create new scope for procedure
@@ -195,6 +191,9 @@ namespace JoshPiler
 
             // Parse PROCEDURE's local vars
             if (m_tok.m_tokType == Token.TOKENTYPE.VAR) Vars(m_SymTable.ActiveScope, 4);
+
+            // Parse PROCEDURE's contents
+            ProcFunction();
         } // Procedure()
 
         /// <summary>
@@ -414,99 +413,84 @@ namespace JoshPiler
             } // While != BEGIN
         } // Var()
 
+        private void ProcFunction()
+        {
+            // *********************
+            // ***** PROCEDURE ***** 
+            // skip BEGIN
+            m_tok = m_Tknzr.NextToken();
+
+            // Find PROCEDURE symbol in one below top scope
+            Scope scpActive = m_SymTable.GetCurrentScope();
+            Scope scpCalling = m_SymTable.GetScope(m_iScopeLevel - 1);
+            Symbol symProc = null;
+            foreach (Symbol sym in scpCalling.Symbols)
+                if (sym.SymType == Symbol.SYMBOL_TYPE.TYPE_PROC || sym.SymType == Symbol.SYMBOL_TYPE.TYPE_REFPROC)
+                {
+                    symProc = sym;
+                    break;
+                } // get procedure symbol
+            // error
+            if (symProc == null)
+                ErrorHandler.Error(ERROR_CODE.SYMBOL_UNDEFINED, m_tok.m_iLineNum,
+                    "Expecting PROCEDURE name");
+
+            // procedure header
+            if (c_bParserASMDebug) m_Em.asm(string.Format(";======= PROCEDURE: {0} =======", symProc.Name));
+
+            // Print jump label
+            m_Em.Label(symProc.Name);
+
+            // Prep procedure stack, save old stack info
+            m_Em.pushReg("BP");         // save old stack base
+            m_Em.movReg("BP", "SP");    // stack pointer now points to "bottom" of procedure stack
+
+            // Make room for local variables
+            // Get number of local variables
+            if (c_bParserASMDebug) m_Em.asm("; Make room for local variables ;;;;;;;;");
+            int iArg = 0;
+            foreach (Symbol sym in scpActive.Symbols)
+                if (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR ||
+                    sym.ParamType == Symbol.PARAMETER_TYPE.REF_PARM) ++iArg;
+
+            // space for local variables
+            m_Em.Sub("SP", (4 + (4 * (iArg))).ToString());
+
+            if (c_bParserASMDebug) m_Em.asm("; Function Body ;;;;;;;;");
+            // Parse/Emit until END
+            ParseLoop();
+
+            if (c_bParserASMDebug) m_Em.asm("; Epilogue  ;;;;;;;;");
+            // Deallocate variables (readjust stack)
+            m_Em.movReg("SP", "BP");
+
+            // Restore old basepointer
+            m_Em.popReg("BP");
+
+            // Print return instruction
+            m_Em.asm("ret     ; Return to calling code");
+
+            // procedure footer
+            if (c_bParserASMDebug) m_Em.asm(string.Format(";======= END PROCEDURE: {0} =======", symProc.Name));
+
+            // match end
+            Match(Token.TOKENTYPE.END);
+            Match(Token.TOKENTYPE.ID);
+            Match(Token.TOKENTYPE.SEMI_COLON);
+
+            // remove active scope, set next active
+            m_SymTable.RemoveScope();
+
+        } // ProcFunction()
+
         /// <summary>
         /// Parses the the function body of a modula-2 file, including PROCEDURE's
         /// </summary>
         private void Function()
         {
-            // Force jump to main when first run
-            m_Em.Jump("jmp", "__MAIN");
-
             // Check for BEGIN token
             if (m_tok.m_tokType == Token.TOKENTYPE.BEGIN)
             {
-                // If scope is > 0 then first BEGIN belongs to a PROCEDURE
-                while (m_SymTable.ActiveScope > 0)
-                {
-                    // *********************
-                    // ***** PROCEDURE ***** 
-                    // skip BEGIN
-                    m_tok = m_Tknzr.NextToken();
-
-                    // Find PROCEDURE symbol in one below top scope
-                    Scope scpActive = m_SymTable.GetCurrentScope();
-                    Scope scpCalling = m_SymTable.GetScope(m_iScopeLevel - 1);
-                    Symbol symProc = null;
-                    foreach (Symbol sym in scpCalling.Symbols)
-                        if (sym.SymType == Symbol.SYMBOL_TYPE.TYPE_PROC || sym.SymType == Symbol.SYMBOL_TYPE.TYPE_REFPROC)
-                        {
-                            symProc = sym;
-                            break;
-                        } // get procedure symbol
-                    // error
-                    if (symProc == null)
-                        ErrorHandler.Error(ERROR_CODE.SYMBOL_UNDEFINED, m_tok.m_iLineNum,
-                            "Expecting PROCEDURE name");
-
-                    // procedure header
-                    if (c_bParserASMDebug) m_Em.asm(string.Format(";======= PROCEDURE: {0} =======", symProc.Name));
-
-                    // Print jump label
-                    m_Em.Label(symProc.Name);
-
-                    // Prep procedure stack, save old stack info
-                    m_Em.pushReg("BP");         // save old stack base
-                    m_Em.movReg("BP", "SP");    // stack pointer now points to "bottom" of procedure stack
-
-                    // Make room for local variables
-                    // Get number of local variables
-                    if (c_bParserASMDebug) m_Em.asm("; Make room for local variables ;;;;;;;;");
-                    int iArg = 0;
-                    foreach (Symbol sym in scpActive.Symbols)
-						if (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR ||
-                            sym.ParamType == Symbol.PARAMETER_TYPE.REF_PARM) ++iArg;
-
-                    // space for local variables
-                    m_Em.Sub("SP", (4 + (4 * (iArg))).ToString());
-
-                    // check if arguments are reference arguments
-                    // if so, then store proper address where needed
-                    //foreach (Symbol sym in scpActive.Symbols)
-                    //{
-                    //    if (sym.ParamType == Symbol.PARAMETER_TYPE.REF_PARM)
-                    //    {
-                    //        // store offsets where needed
-                    //        //m_Em.movReg(string.Format("[BP+{0}], "
-
-                    //    }
-                    //}
-
-                    if (c_bParserASMDebug) m_Em.asm("; Function Body ;;;;;;;;");
-                    // Parse/Emit until END
-                    ParseLoop();
-
-                    if (c_bParserASMDebug) m_Em.asm("; Epilogue  ;;;;;;;;");
-                    // Deallocate variables (readjust stack)
-                    m_Em.movReg("SP", "BP");
-
-                    // Restore old basepointer
-                    m_Em.popReg("BP");
-
-                    // Print return instruction
-                    m_Em.asm("ret     ; Return to calling code");
-
-                    // procedure footer
-                    if (c_bParserASMDebug) m_Em.asm(string.Format(";======= END PROCEDURE: {0} =======", symProc.Name));
-
-                    // match end
-                    Match(Token.TOKENTYPE.END);
-                    Match(Token.TOKENTYPE.ID);
-                    Match(Token.TOKENTYPE.SEMI_COLON);
-
-                    // remove active scope, set next active
-                    m_SymTable.RemoveScope();      
-                } // PROCEDURE parsing
-
                 Match(Token.TOKENTYPE.BEGIN);
 
                 // Label to jump to upon first run

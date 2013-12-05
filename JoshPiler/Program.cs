@@ -25,7 +25,7 @@ namespace JoshPiler
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new JoshPiler.Forms.SplashScreen());
+            //Application.Run(new JoshPiler.Forms.SplashScreen());
             Application.Run(new MainForm());
         }
     }
