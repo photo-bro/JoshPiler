@@ -189,7 +189,10 @@ namespace JoshPiler
 
             Match(Token.TOKENTYPE.SEMI_COLON);
 
-            // Parse PROCEDURE's local vars
+            // CONST
+            if (m_tok.m_tokType == Token.TOKENTYPE.CONST) Const(m_iScopeLevel);
+
+            // VAR  Parse PROCEDURE's local vars
             if (m_tok.m_tokType == Token.TOKENTYPE.VAR) Vars(m_SymTable.ActiveScope, 4);
 
             // Parse PROCEDURE's contents
@@ -275,7 +278,7 @@ namespace JoshPiler
         /// <summary>
         /// Parses the CONST section of a modula-2 file
         /// </summary>
-        private void Const()
+        private void Const(int scope = 0)
         {
             Match(Token.TOKENTYPE.CONST);
             List<int> intList = new List<int>();        // const values
@@ -310,7 +313,7 @@ namespace JoshPiler
             // add static symbols to table
             for (int i = 0; i < lsIDs.Count; ++i)
             {
-                m_SymTable.AddSymbol(new Symbol(lsIDs[i], 0, Symbol.SYMBOL_TYPE.TYPE_CONST, Symbol.STORAGE_TYPE.TYPE_INT,
+                m_SymTable.AddSymbol(new Symbol(lsIDs[i], scope, Symbol.SYMBOL_TYPE.TYPE_CONST, Symbol.STORAGE_TYPE.TYPE_INT,
                     Symbol.PARAMETER_TYPE.LOCAL_VAR, 0, intList[i]));
             }
         } // Const()
@@ -701,9 +704,7 @@ namespace JoshPiler
                         // Get value into EAX then push onto stack
                         EvalPostFix(InFixToPostFix(lslsArgs[i-1]));
                         m_Em.pushReg("EAX");
-                    } // Push paramaters for function
-
-
+                    } // Push parameters for function
 
                     Match(Token.TOKENTYPE.SEMI_COLON);
 
@@ -724,8 +725,8 @@ namespace JoshPiler
             // Check if ARRAY, get proper offset
             if (m_tok.m_tokType == Token.TOKENTYPE.LEFT_BRACK)
             {
-                // ***** ARRAY ***** //
-                if (c_bParserASMDebug) m_Em.asm(";;;; ARRAY ;;;;");
+                // ***** ARRAY  ID() ***** //
+                if (c_bParserASMDebug) m_Em.asm(";;;; ARRAY Assignment ;;;;");
                 m_tok = m_Tknzr.NextToken();
                 List<Token> lsIndex = new List<Token>();
                 
@@ -739,6 +740,7 @@ namespace JoshPiler
                 
                 //m_Em.GetVar(symNdx.Offset);                     // get index value
                 EvalPostFix(InFixToPostFix(lsIndex));
+                m_Em.asm(";//// Array Assign. Index ^ Offset Calculation below: "); // trace
                 m_Em.movReg("EBX", "EAX"); 	                      // put index in ebx
                 m_Em.movReg("EAX", sym.ArrayEnd.ToString());      // Array end in eax
                 m_Em.Sub("EAX", "EBX"); 				          // get proper offset-> ArrEnd - Index
@@ -751,6 +753,8 @@ namespace JoshPiler
                 m_Em.asm("  movzx ECX, BP     ; mov zero extend");
                 m_Em.Sub("ECX", "EAX");
                 m_Em.pushReg("ECX");                              // push offset 
+
+                m_Em.asm(";//// value assigned to Array");
 
                 // Now push BP-EAX
                 //m_Em.movReg("DI", "AX");                          // offset into Destination Index register
@@ -1107,15 +1111,24 @@ namespace JoshPiler
                         } // if not neg
                         break;
                     case Token.TOKENTYPE.ID:
+                        
                         // Check if ARRAY
                         if (j + 1 < lsExpression.Count && lsExpression[j + 1].m_tokType /*m_Tknzr.PeekToken().m_tokType*/
                             == Token.TOKENTYPE.LEFT_BRACK)
                         {
-                            lsPostFix.Add(lsExpression[j]); // add ID
-                            j+=2;                           // skip over [
-                            lsPostFix.Add(lsExpression[j]); // add index to postfix
-                            ++j;                            // place at ]
-                            //Match(Token.TOKENTYPE.RIGHT_BRACK);
+                            lsPostFix.Add(lsExpression[j]);          // add ID
+                            ++j;                                     // only skip over ID, [ is current token
+                            lsPostFix.Add(lsExpression[j]);          // add [
+                            ++j;                                     // move to next
+
+                            // Add array as ID [ postfix index exp ]
+                            // ex:          list[23*]
+                            List<Token> ltTemp = new List<Token>();
+                            // Add everything in brackets and convert to postfix
+                            for (; lsExpression[j].m_tokType != Token.TOKENTYPE.RIGHT_BRACK; ++j)
+                                ltTemp.Add(lsExpression[j]);
+                            lsPostFix.AddRange(InFixToPostFix(ltTemp)); // add post fix expression
+                            lsPostFix.Add(lsExpression[j]);             // add ] 
                             break;
                         }
                         goto case Token.TOKENTYPE.INT_NUM;
@@ -1301,7 +1314,7 @@ namespace JoshPiler
                         switch (sym.SymType)
                         {
                             case Symbol.SYMBOL_TYPE.TYPE_SIMPLE:
-                                if (c_bParserASMDebug) m_Em.asm(string.Format(";;; Variable: {0}", sym.Name));
+                                if (c_bParserASMDebug) m_Em.asm(string.Format(";;; Retrieving Variable: {0}", sym.Name));
                                 // Check if inside a procedure or not
                                 if (m_SymTable.ActiveScope > 0)
                                 {
@@ -1373,13 +1386,28 @@ namespace JoshPiler
                                 m_Em.pushInt(sym.Value);
                                 break;
                             case Symbol.SYMBOL_TYPE.TYPE_ARRAY:
-
-                                Symbol symNdx = m_SymTable.FindSymbol(tokens[i+1].m_strName); // get index symbol
+                                // Postfix should be such as ARRAY[postfix exp] so 1+list[2*3] => 1list[23*]+
+                                Symbol symNdx = m_SymTable.FindSymbol(tokens[i+2].m_strName); // get index symbol
                                 // Get value from array at proper index
                                 // Offset for BP:
                                 // BaseOffset + (ArrayEnd - Index) * sizeof(int)
-                                if (c_bParserASMDebug) m_Em.asm(";;;; EVAL ARRAY");
-                                m_Em.movReg("EBX", string.Format("[BP-{0}]", symNdx.Offset));
+                                if (c_bParserASMDebug) m_Em.asm(string.Format("; Retrieving ARRAY value: {0}[{1}]", sym.Name, symNdx.Name));
+                                //m_Em.movReg("EBX", string.Format("[BP-{0}]", symNdx.Offset));
+
+                                // Get index referenced from postfix tokens
+                                //  evaluate expression 
+                                i+=2;        // move over [
+                                List<Token> ltIndex = new List<Token>();
+                                for (; tokens[i].m_tokType != Token.TOKENTYPE.RIGHT_BRACK; ++i)
+                                    ltIndex.Add(tokens[i]);
+                                if (ltIndex.Count == 1)
+                                    m_Em.movReg("EBX", string.Format("[BP-{0}]", symNdx.Offset));
+                                else
+                                {
+                                    EvalPostFix(ltIndex);
+                                    m_Em.movReg("EBX", "EAX");
+                                }
+
                                 m_Em.movReg("EAX", sym.ArrayEnd.ToString());      // Array end in eax
                                 m_Em.Sub("EAX", "EBX"); 				          // get proper offset-> ArrEnd - Index
                                 m_Em.iMul("EAX", "4");					          // multiply by int size
@@ -1392,14 +1420,8 @@ namespace JoshPiler
                                 m_Em.Sub("ECX", "EAX");                           // address of array element
                                 m_Em.movReg("EAX", "[ECX]");                      // get value
                                 m_Em.pushReg("EAX");      
-                                ++i;						                      // increment counter (count over index)
+                                //++i;						                      // increment counter (count over index)
                                 if (c_bParserASMDebug) m_Em.asm(";;;; END EVAL ARRAY");
-
-                                //m_Em.WRLN();
-                                //m_Em.WRSTR("ArrValue: ");
-                                //m_Em.asm("PutLInt  [BP+DI]");
-                                //m_Em.WRSTR("  ArrOffset: ");
-                                //m_Em.asm("PutLInt EAX");
                                 break;
                             default:
                                 break;
