@@ -34,7 +34,6 @@ namespace JoshPiler
         private const string m_LABEL_BASE = "LABEL_";
         private const string m_ARITH_BASE = "COND_";
 
-
         // ASM Debug compiler Flag
         public static bool c_bParserASMDebug = true;
 
@@ -450,13 +449,23 @@ namespace JoshPiler
             // Make room for local variables
             // Get number of local variables
             if (c_bParserASMDebug) m_Em.asm("; Make room for local variables ;;;;;;;;");
-            int iArg = 0;
+            int iArg = 0, iVariableSpace = 0;
             foreach (Symbol sym in scpActive.Symbols)
                 if (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR ||
                     sym.ParamType == Symbol.PARAMETER_TYPE.REF_PARM) ++iArg;
+            iVariableSpace = 4 + (4 * (iArg)); // integer variables
+
+            List<int> liArraySizes = new List<int>();
+            List<Symbol> lsArrays = new List<Symbol>();
+
+            // WOOH LAMBDAS!
+            // Get all Array symbols into a list
+            lsArrays.AddRange(scpActive.Symbols.ToList().FindAll(sym => sym.SymType.Equals(Symbol.SYMBOL_TYPE.TYPE_ARRAY)));
+            // Get all offsets
+            lsArrays.ForEach(sym => iVariableSpace += (sym.ArrayEnd - sym.BaseOffset) * 4);
 
             // space for local variables
-            m_Em.Sub("SP", (4 + (4 * (iArg))).ToString());
+            m_Em.Sub("SP", iVariableSpace.ToString());
 
             if (c_bParserASMDebug) m_Em.asm("; Function Body ;;;;;;;;");
             // Parse/Emit until END
@@ -694,11 +703,28 @@ namespace JoshPiler
                         // if proc is reference then push just BP-Off not [BP-Off]
                         if (sym.SymType == Symbol.SYMBOL_TYPE.TYPE_REFPROC)
                         {
-                            Symbol syRef = FindSymbol(lslsArgs[i-1][0].m_strName);
-                            m_Em.asm("  movzx EAX, BP     ; mov zero extend");
-                            m_Em.Sub("EAX", syRef.Offset.ToString());
-                            m_Em.pushReg("EAX"); 		   // final address of variable
-                            continue;
+                            Symbol syRef = FindSymbol(lslsArgs[i - 1][0].m_strName);
+
+                            switch (syRef.SymType)
+                            {
+                                case Symbol.SYMBOL_TYPE.TYPE_SIMPLE:
+                                    m_Em.asm("  movzx EAX, BP     ; mov zero extend");
+                                    m_Em.Sub("EAX", syRef.Offset.ToString());
+                                    m_Em.pushReg("EAX"); 		   // final address of variable
+                                    continue;
+                                case Symbol.SYMBOL_TYPE.TYPE_ARRAY:
+                                    // calculate index referenced [ exp ]
+                                    EvalPostFix(InFixToPostFix(lslsArgs[i - 1]));
+                                    m_Em.movReg("EBX", "EAX");
+                                    m_Em.asm("  movzx EAX, BP     ; mov zero extend");
+                                    m_Em.Sub("EAX", "EBX");
+                                    m_Em.pushReg("EAX");
+                                    continue;
+
+
+                                default:
+                                    break;
+                            }
                         }
                         // Get value into EAX then push onto stack
                         EvalPostFix(InFixToPostFix(lslsArgs[i-1]));
@@ -711,8 +737,30 @@ namespace JoshPiler
                     m_Em.asm(string.Format("call     {0}     ; PROCEDURE {0}", sym.Name));
 
                     // restore stack
-                    //for (int i = 0; i < iArgCount; ++i) m_Em.popInt();
-                    m_Em.Add("SP", (4 * iArgCount).ToString());
+                    int iOffset = 0;
+                    
+                    // Get offset based off of arguments
+                    // Get list of symbols
+                    foreach(List<Token> lt in lslsArgs)
+                        foreach (Token t in lt)
+                        {
+                            if (m_SymTable.FindSymbol(t.m_strName) == null) continue;
+                            switch (m_SymTable.FindSymbol(t.m_strName).SymType)
+                            {
+                                case Symbol.SYMBOL_TYPE.TYPE_SIMPLE:
+                                    iOffset += 4;
+                                    break;
+                                case Symbol.SYMBOL_TYPE.TYPE_ARRAY:
+                                    iOffset+= (m_SymTable.FindSymbol(t.m_strName).ArrayEnd -
+                                        m_SymTable.FindSymbol(t.m_strName).BaseOffset)*4;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    
+
+                    m_Em.Add("SP", iOffset.ToString());
                     return; // no need to go through rest of function, exit
                 default:
                     break;
