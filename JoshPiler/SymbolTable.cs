@@ -424,7 +424,7 @@ namespace JoshPiler
             {
                 Scope scope = c_stkScope.Pop();
                 m_sbSymStr.Append(scope.ToString());
-                m_sbSymStr.Append(string.Format("Scope {0} now removed\r\n", c_iCurScope));
+                //m_sbSymStr.Append(string.Format("Scope {0} now removed\r\n", c_iCurScope));
                 c_iCurScope = c_stkScope.Peek().CurrentScope; // get current scope
             }
         } // RemoveScope
@@ -467,6 +467,12 @@ namespace JoshPiler
         /// </summary>
         public int ActiveScope
         { get { return c_iCurScope; } }
+
+        /// <summary>
+        /// Returns scope level for the next scope to be created
+        /// </summary>
+        public int NextScope
+        { get { return c_iTopScope; } }
 
         /// <summary>
         /// Returns Symbol referenced in current Scope by sSym. null has been returned if not found.

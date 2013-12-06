@@ -34,8 +34,6 @@ namespace JoshPiler
         private const string m_LABEL_BASE = "LABEL_";
         private const string m_ARITH_BASE = "COND_";
 
-        // PROC scope
-        private int m_iScopeLevel = 1; // 0 or lower refers to main MODULE
 
         // ASM Debug compiler Flag
         public static bool c_bParserASMDebug = true;
@@ -135,6 +133,8 @@ namespace JoshPiler
         {
             // PROCEDURE little
             //( i : INTEGER ) ;
+            // store calling scope
+            int iCallScope = m_SymTable.ActiveScope;
 
             // consume PROCEDURE token
             m_tok = m_Tknzr.NextToken(); 
@@ -150,32 +150,29 @@ namespace JoshPiler
             m_tok = m_Tknzr.NextToken();
 
             Match(Token.TOKENTYPE.LEFT_PAREN);
-
             // check for passed by reference
             //  if VAR token exists then parameters are reference types
             if (m_tok.m_tokType == Token.TOKENTYPE.VAR)
             {
-
-                // Add PROC to symbol table
-                m_SymTable.AddSymbol(new Symbol(tkProcID.m_strName, m_iScopeLevel, Symbol.SYMBOL_TYPE.TYPE_REFPROC,
+                // Add PROC to symbol table to calling scope
+                m_SymTable.AddSymbol(new Symbol(tkProcID.m_strName, iCallScope, Symbol.SYMBOL_TYPE.TYPE_REFPROC,
                     Symbol.STORAGE_TYPE.STORE_NONE, Symbol.PARAMETER_TYPE.LOCAL_VAR, 0));
 
                 // Create new scope for procedure
                 m_SymTable.AddScope();
 
-
                 m_tok = m_Tknzr.NextToken(); // consume VAR token
                 while (m_tok.m_tokType != Token.TOKENTYPE.RIGHT_PAREN)
-                    VarDef(m_iScopeLevel, 4, Symbol.PARAMETER_TYPE.REF_PARM);
+                    VarDef(m_SymTable.ActiveScope, 4, Symbol.PARAMETER_TYPE.REF_PARM);
 
-                // Add Proc sym with new SYMBOL_TYPE so that we know the parameters are of reference type
+                // Add Proc sym with TYPE_REFPROC so that we know the parameters are of reference type
                 //  in the ID() function. Do so by overwriting the symbol
             }
             // Pass by value
             else 
             {
-                // Add PROC to symbol table
-                m_SymTable.AddSymbol(new Symbol(tkProcID.m_strName, m_iScopeLevel, Symbol.SYMBOL_TYPE.TYPE_PROC,
+                // Add PROC to symbol table to calling scope
+                m_SymTable.AddSymbol(new Symbol(tkProcID.m_strName, iCallScope, Symbol.SYMBOL_TYPE.TYPE_PROC,
                     Symbol.STORAGE_TYPE.STORE_NONE, Symbol.PARAMETER_TYPE.LOCAL_VAR, 0));
 
                 // Create new scope for procedure
@@ -183,20 +180,22 @@ namespace JoshPiler
 
                 // Parse procedure paramaters (arguments)
                 while (m_tok.m_tokType != Token.TOKENTYPE.RIGHT_PAREN)          // while not )
-                    VarDef(m_iScopeLevel, 4, Symbol.PARAMETER_TYPE.VAL_PARM);   // baseoffset for scope starts at 4
+                    VarDef(m_SymTable.ActiveScope, 4, Symbol.PARAMETER_TYPE.VAL_PARM);   // baseoffset for scope starts at 4
             }
             m_tok = m_Tknzr.NextToken();     // Consume )
 
             Match(Token.TOKENTYPE.SEMI_COLON);
 
             // CONST
-            if (m_tok.m_tokType == Token.TOKENTYPE.CONST) Const(m_iScopeLevel);
+            if (m_tok.m_tokType == Token.TOKENTYPE.CONST) Const(m_SymTable.ActiveScope);
 
             // VAR  Parse PROCEDURE's local vars
             if (m_tok.m_tokType == Token.TOKENTYPE.VAR) Vars(m_SymTable.ActiveScope, 4);
 
             // Parse PROCEDURE's contents
-            ProcFunction();
+            m_Em.asm(string.Format("\r\n\r\n;// START Procedure: {0}", tkProcID.m_strName));
+            ProcFunction(iCallScope, tkProcID.m_strName);
+            m_Em.asm(string.Format(";// END   Procedure: {0}\r\n\r\n", tkProcID.m_strName));
         } // Procedure()
 
         /// <summary>
@@ -416,7 +415,7 @@ namespace JoshPiler
             } // While != BEGIN
         } // Var()
 
-        private void ProcFunction()
+        private void ProcFunction(int callingscope, string procname)
         {
             // *********************
             // ***** PROCEDURE ***** 
@@ -425,10 +424,10 @@ namespace JoshPiler
 
             // Find PROCEDURE symbol in one below top scope
             Scope scpActive = m_SymTable.GetCurrentScope();
-            Scope scpCalling = m_SymTable.GetScope(m_iScopeLevel - 1);
+            Scope scpCalling = m_SymTable.GetScope(callingscope);
             Symbol symProc = null;
             foreach (Symbol sym in scpCalling.Symbols)
-                if (sym.SymType == Symbol.SYMBOL_TYPE.TYPE_PROC || sym.SymType == Symbol.SYMBOL_TYPE.TYPE_REFPROC)
+                if (sym.Name == procname)
                 {
                     symProc = sym;
                     break;
