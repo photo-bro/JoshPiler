@@ -176,9 +176,9 @@ namespace JoshPiler
         /// EAX. end is the end of the array, offset is the symbol offset. local
         /// determines if array is a reference or local var
         /// </summary>
-        public void CalcArrayAddress(string end, string offset, bool local)
+        public void CalcArrayAddress(string end, string offset, bool local, string s = "")
         {
-            // BaseOffset + (ArrayEnd - Index) * IntSize
+            // ArrayBase - (ArrayEnd - Index) * IntSize
 
             asm(";// Calculate index offset from base. First move index to EBX");
             movReg("EBX", "EAX"); 	                      // put index in ebx
@@ -190,11 +190,14 @@ namespace JoshPiler
             iMul("EAX", "4");					          // multiply by int size
 
             //asm(";// EBX = Base");
-            // Get BaseOffset
+            // Get ArrayOffset
             // if local it is just at Sym.offset (offset)
             // if refernce it is at [BP+offset]
             if (local)
-                movReg("EBX", offset);        // EBX = base
+            {
+                asm("  movzx EBX, BP");
+                Sub("EBX", offset.ToString());
+            }
             else
             {
                 // Get address of whole array
@@ -204,14 +207,14 @@ namespace JoshPiler
                 //asm(";// EBX = Base + (End - Index) * 4:");
             }
 
-            // Add calculated offset to BaseOffset
-            Add("EAX", "EBX");                 // Add index offset to array base
-
             // Calculate final offset from BP
-            asm("  movzx EBX, BP     ; mov zero extend");
             Sub("EBX", "EAX");
-            movReg("EAX", "ECX");
-        }
+            movReg("EAX", "EBX");
+
+            WRSTR(s);
+            WRINT();
+            WRLN();
+        } // CalcArrayAddress
 
         /// <summary>
         /// Compare the last two values in the stack. Result is pushed back on stack. 1 = true,

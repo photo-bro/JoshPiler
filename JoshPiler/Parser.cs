@@ -332,9 +332,8 @@ namespace JoshPiler
             List<string> lsIDs = new List<string>();
             
             // stack offset to access variable
-            int iOffset;
             // check if using local or global offset
-            iOffset = (baseoffset < 0) ? m_iOff : baseoffset;
+            int  iOffset = (baseoffset < 0) ? m_iOff : baseoffset;
 
             // loop through all var definitions (ex. i, k, j : INTEGER)
             while (m_tok.m_tokType != Token.TOKENTYPE.COLON)
@@ -390,7 +389,7 @@ namespace JoshPiler
 						// ARRAY
                             m_SymTable.AddSymbol(new Symbol(s, scope, Symbol.SYMBOL_TYPE.TYPE_ARRAY, Symbol.STORAGE_TYPE.TYPE_INT,
                                 Paramater_Type, iOffset, 0, sym.BaseOffset, sym.ArrayEnd));
-                        iOffset += ((sym.ArrayEnd - sym.BaseOffset) +1 ) * 4; // memory offset of array-> sizeof(int)*(EndIndex - BeginIndex)
+                        iOffset += (sym.ArrayEnd - sym.BaseOffset) * 4; // memory offset of array-> sizeof(int)*(EndIndex - BeginIndex)
                         break;
                 } // switch
             } // foreach
@@ -802,70 +801,21 @@ namespace JoshPiler
                 for (; m_tok.m_tokType != Token.TOKENTYPE.RIGHT_BRACK; m_tok = m_Tknzr.NextToken())
                     lsIndex.Add(m_tok);
 
-                switch (sym.ParamType)
-                {
-                    case Symbol.PARAMETER_TYPE.LOCAL_VAR:
-                        // Get value for the proper index
-                        // Offset for BP:
-                        // Offset + (ArrayEnd - Index) * IntSize
+                // get index value
+                EvalPostFix(InFixToPostFix(lsIndex));
+                // calculate address
+                m_Em.CalcArrayAddress(sym.ArrayEnd.ToString(),
+                 sym.Offset.ToString(),
+                 (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR),
+                 "ID() ADDRESS: ");
 
-                        //m_Em.GetVar(symNdx.Offset);                     // get index value
-                        EvalPostFix(InFixToPostFix(lsIndex));
-                        m_Em.asm(";//// Array Assign. Index ^ Offset Calculation below: "); // trace
-                        m_Em.movReg("EBX", "EAX"); 	                      // put index in ebx
-                        m_Em.movReg("EAX", sym.ArrayEnd.ToString());      // Array end in eax
-                        m_Em.Sub("EAX", "EBX"); 				          // get proper offset-> ArrEnd - Index
-                        m_Em.iMul("EAX", "4");					          // multiply by int size
-                        m_Em.movReg("EBX", sym.Offset.ToString());        // EBX = base
-                        m_Em.Add("EAX", "EBX");			                  // compute final offset
+                // push for assignment
+                m_Em.movReg("EBX", "EAX");
+                m_Em.pushReg("EBX");
 
-                        // calcuate address from calculated offset
-                        m_Em.asm(";; Store address of var in EAX"); // trace
-                        m_Em.asm("  movzx ECX, BP     ; mov zero extend");
-                        m_Em.Sub("ECX", "EAX");
-                        m_Em.pushReg("ECX");                              // push offset 
-
-                        m_Em.asm(";//// value assigned to Array");
-                        break;
-                    case Symbol.PARAMETER_TYPE.REF_PARM:
-
-                        // BaseOffset + (ArrayEnd - Index) * IntSize
-                        // BaseOffset = Address of Array
-
-                        //m_Em.GetVar(symNdx.Offset);                     // get index value
-                        EvalPostFix(InFixToPostFix(lsIndex));
-                        m_Em.asm(";//// REF Array Assign. Index ^ Offset Calculation below: "); // trace
-
-                        m_Em.asm(";// Calculate index offset from base. First move index to EBX");
-                        m_Em.movReg("EBX", "EAX"); 	                      // put index in ebx
-                        m_Em.asm(";// Offset = Base + (End - Index) * 4. Array End:");
-                        m_Em.movReg("EAX", sym.ArrayEnd.ToString());      // Array end in eax
-                        m_Em.asm(";// End- Index(EBX):");
-                        m_Em.Sub("EAX", "EBX"); 				          // get proper offset-> ArrEnd - Index
-                        m_Em.asm(";// (End- Index(EBX)) * 4:");
-                        m_Em.iMul("EAX", "4");					          // multiply by int size
-
-                        // Get address of whole array
-                        // [BP+refSym.offset]
-                        m_Em.asm(";// EBX = *Base");
-                        m_Em.asm("  movzx EBX, BP     ; mov zero extend");
-                        m_Em.Add("EBX", sym.Offset.ToString()); // 
-                        m_Em.asm(";// ECX = Base");
-                        m_Em.movReg("ECX", "[EBX]");   // Address of base of array in ECX
-                        m_Em.asm(";// ECX = Base + (End - Index) * 4:");
-                        m_Em.Add("ECX", "EAX");                 // Add index offset to array base
-
-                        m_Em.asm(";// TRACE PRINT: ");
-                        m_Em.movReg("EAX", "ECX");
-                        m_Em.WRSTR("ID() - Array Ref_Parm - Address in EAX: ");
-                        m_Em.WRINT();
-                        m_Em.WRLN();
-
-                        m_Em.pushReg("EAX"); 		   // final address of variable
-
-                        m_Em.asm(";//// value assigned to Array");
-                        break;
-                }
+                //m_Em.WRSTR("ID ADDRESS:  ");
+                //m_Em.WRINT();
+                //m_Em.WRLN();
                 Match(Token.TOKENTYPE.RIGHT_BRACK);
             } // ARRAY
             else // type INT
@@ -893,10 +843,12 @@ namespace JoshPiler
                     // not implemented
                     default:
                         break;
-                }
-            }
+                } // sym.ParamType
+            } // INT address
 
             Match(Token.TOKENTYPE.ASSIGN); // :=
+
+            // Get value to be stored
             if (m_tok.m_tokType == Token.TOKENTYPE.RDINT)
             {
                 m_Em.RDINT();                  // get int from user
@@ -909,38 +861,9 @@ namespace JoshPiler
 
             // Value to be stored should be in EAX
             //  store the value at proper place:
-            //m_Em.pushReg("EAX"); // value is in EAX push onto stack
-            //m_Em.movReg("EBX", "EAX");       // value to be stored into EBX   
             m_Em.popReg("ECX");                   // get address from stack
-            //m_Em.movReg("DI", "AX");         // mov offset to Destination Index register
-            if (m_SymTable.ActiveScope > 0)
-                switch (sym.ParamType)
-                {
-                    case Symbol.PARAMETER_TYPE.LOCAL_VAR:
-                        m_Em.movReg(string.Format("[BP-{0}]", sym.Offset + 4), "EAX");   
-                        break;
-                    case Symbol.PARAMETER_TYPE.VAL_PARM:
-                        m_Em.movReg("[ECX]", "EAX");   // assign value to BP+OFFSET
-                        break;
-                    case Symbol.PARAMETER_TYPE.REF_PARM:
-                        m_Em.asm(";** Store value in REF_PARM - ID()"); // trace
-                        // mov EBX, [BP+offset]
-                        // mov EAX, [EBX]
-                        //  
-                       //m_Em.movReg("ECX", "[BP+DI]"); // load absolute address of var into ECX
-                        m_Em.movReg("[ECX]", "EAX");    // store address saved at [ECX]
-                        //m_Em.movReg("EAX", "[EBX]");    // store value at address pointed to by [ECX]
-                        break;
-                    default:
-                        break;
-                }
-            else
-            {
-                //m_Em.asm(";; Store value at location pointed to by ECX"); // trace
-                m_Em.movReg("[ECX]", "EAX");
-                //m_Em.movReg("[BP+DI]", "EBX");   // assign value to BP+OFFSET
-            }
-            //if (c_bParserASMDebug) m_Em.asm(";;;; END ID -- ARRAY");
+            m_Em.movReg("[ECX]", "EAX");
+            
             Match(Token.TOKENTYPE.SEMI_COLON);
         } // ID()
 
@@ -1492,16 +1415,10 @@ namespace JoshPiler
                                 break;
                             case Symbol.SYMBOL_TYPE.TYPE_ARRAY:
                                 // Postfix should be such as ARRAY[postfix exp] so 1+list[2*3] => 1list[23*]+
-                                // Get value from array at proper index
-                                // Offset for BP:
-                                // BaseOffset + (ArrayEnd - Index) * sizeof(int)
-                                
-                                //m_Em.movReg("EBX", string.Format("[BP-{0}]", symNdx.Offset));
 
-                                // Get index referenced from postfix tokens
-                                //  evaluate expression 
+                                i += 2;        // move over '[' to postfix exp
 
-                                i += 2;        // move over [
+                                // get postfix exp as token list
                                 List<Token> ltIndex = new List<Token>();
                                 for (; tokens[i].m_tokType != Token.TOKENTYPE.RIGHT_BRACK; ++i)
                                     ltIndex.Add(tokens[i]);
@@ -1523,79 +1440,13 @@ namespace JoshPiler
                                 // get value of index
                                 EvalPostFix(ltIndex);
 
-                                switch (sym.ParamType)
-                                {
+                                // Calculate address
+                                m_Em.CalcArrayAddress(sym.ArrayEnd.ToString(), sym.Offset.ToString(), 
+                                    (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR),
+                                    "EVALPOSTFIX ADDRESS: ");
 
-                                    case Symbol.PARAMETER_TYPE.REF_PARM:
-                                        // Value pushed above BP is a pointer to array
-                                        // Set BP = pointer then [BP-Index] = value
-                                        // or EAX = pointer-index => value
-                                        // BaseOffset + (ArrayEnd - Index) * sizeof(int)
-
-                                        // index in eax
-                                       // m_Em.movReg("EBX", sym.ArrayEnd.ToString());
-                                       // m_Em.Sub("EBX", "EAX");
-                                       // m_Em.iMul("EBX", "4");      // calculate offset of for index
-
-                                       // // Get address of array
-                                       // m_Em.Add("ECX", sym.Offset.ToString()); 
-                                       // m_Em.movReg("EBX", "[ECX]");
-                                       // m_Em.Add("EAX", "EBX");
-
-
-                                       //// retrieve final value
-                                       // m_Em.movReg("EAX", "[EBX]");  // store value at address
-                                       // m_Em.pushReg("EAX"); 		  // push value 
-
-                                        m_Em.asm(";// Calculate index offset from base");
-                                        m_Em.movReg("EBX", "EAX"); 	                      // put index in ebx
-                                        m_Em.movReg("EAX", sym.ArrayEnd.ToString());      // Array end in eax
-                                        m_Em.Sub("EAX", "EBX"); 				          // get proper offset-> ArrEnd - Index
-                                        m_Em.iMul("EAX", "4");					          // multiply by int size
-
-                                        // Get address of whole array
-                                        // [BP+refSym.offset]
-                                        m_Em.asm(";// Get base offset from proc argument");
-                                        m_Em.asm("  movzx EBX, BP     ; mov zero extend");
-                                        m_Em.Add("EBX", sym.Offset.ToString()); // 
-                                        m_Em.movReg("ECX", "[EBX]");   // Address of base of array in ECX
-                                        m_Em.movReg("EAX", "[ECX]");   // value at address in ECX in EAX
-                                        m_Em.WRSTR("EvalPostFix - Array Ref_Parm - EAX: ");
-                                        m_Em.WRINT();
-                                        m_Em.WRLN();
-                                        
-
-
-
-                                        break;
-                                    case Symbol.PARAMETER_TYPE.LOCAL_VAR:
-                                        // BaseOffset + (ArrayEnd - Index) * sizeof(int)
-                                        // Index in EAX
-                                        m_Em.movReg("EBX", sym.ArrayEnd.ToString());      // Array end in eax
-                                        m_Em.Sub("EBX", "EAX"); 				          // get proper offset-> ArrEnd - Index
-                                        m_Em.iMul("EBX", "4");					          // multiply by int size
-                                        m_Em.movReg("EAX", sym.Offset.ToString());        // EBX = base	
-                                        m_Em.Add("EAX", "EBX");			                  // compute final offset  
-
-
-                                        // calcuate address from calculated offset
-                                        m_Em.asm("  movzx ECX, BP     ; mov zero extend");
-                                        m_Em.Sub("ECX", "EAX");                           // address of array element
-                                        m_Em.movReg("EAX", "ECX");
-
-                                        m_Em.WRSTR("EvalPostFix - Array LocalVar - Address in EAX: ");
-                                        m_Em.WRINT();
-                                        m_Em.WRLN();
-
-
-                                        m_Em.movReg("EBX", "[EAX]");                      // get value
-                                        m_Em.pushReg("EBX");
-                                        ++i;						                      // increment counter (count over index)
-
-                                        break;
-
-
-                                }
+                                m_Em.movReg("EBX", "[EAX]");   // value at address in ECX in EAX
+                                m_Em.pushReg("EBX");
                                 if (c_bParserASMDebug) m_Em.asm(";;;; END EVAL ARRAY");
                                 break;
                             default:
