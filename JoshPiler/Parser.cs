@@ -370,7 +370,7 @@ namespace JoshPiler
                     case Token.TOKENTYPE.INTEGER:
                         // Add symbol
                         m_SymTable.AddSymbol(new Symbol(s, scope, Symbol.SYMBOL_TYPE.TYPE_SIMPLE, Symbol.STORAGE_TYPE.TYPE_INT,
-                      Paramater_Type, iOffset, 0));
+                      Paramater_Type, iOffset));
                         iOffset += 4; // inc offset by 32bits
                         break;
                     case Token.TOKENTYPE.CARDINAL:
@@ -754,10 +754,33 @@ namespace JoshPiler
             // Call function
             m_Em.asm(string.Format("call     {0}     ; PROCEDURE {0}", sym.Name));
 
-            // restore stack
-            int iOffset = 0;
-
             m_Em.Add("SP", (lslsArgs.Count * 4).ToString());
+        }
+
+        private void ArrayID(Symbol sym)
+        {
+            // ***** ARRAY  ID() ***** //
+            if (c_bParserASMDebug) m_Em.asm(";;;; ARRAY Assignment ;;;;");
+            m_tok = m_Tknzr.NextToken();
+            List<Token> lsIndex = new List<Token>();
+
+            // get index expression (contents between [ ] )
+            for (; m_tok.m_tokType != Token.TOKENTYPE.RIGHT_BRACK; m_tok = m_Tknzr.NextToken())
+                lsIndex.Add(m_tok);
+
+            // get index value
+            EvalPostFix(InFixToPostFix(lsIndex));
+
+            // calculate address
+            m_Em.CalcArrayAddress(sym.ArrayEnd.ToString(),
+             sym.Offset.ToString(),
+             (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR),
+             "ID() ADDRESS: ");
+
+            // push for assignment
+            m_Em.pushReg("EAX");
+
+            Match(Token.TOKENTYPE.RIGHT_BRACK);
         }
 
         /// <summary>
@@ -766,12 +789,8 @@ namespace JoshPiler
         /// </summary>
         private void ID()
         {
-            // temporary Symbol
-            Symbol sym;
-
             // lookup in symbol table
-            // check all scopes first
-            sym = FindSymbol(m_tok.m_strName);
+            Symbol sym = FindSymbol(m_tok.m_strName);
 
             switch (sym.SymType)
             {
@@ -788,63 +807,16 @@ namespace JoshPiler
 
             // consume token
             m_tok = m_Tknzr.NextToken(); // ID
-            //m_Em.asm(";;;; ID -- ARRAY");
+        
             // Check if ARRAY, get proper offset
             if (m_tok.m_tokType == Token.TOKENTYPE.LEFT_BRACK)
-            {
-                // ***** ARRAY  ID() ***** //
-                if (c_bParserASMDebug) m_Em.asm(";;;; ARRAY Assignment ;;;;");
-                m_tok = m_Tknzr.NextToken();
-                List<Token> lsIndex = new List<Token>();
-                
-                // get index expression (contents between [ ] )
-                for (; m_tok.m_tokType != Token.TOKENTYPE.RIGHT_BRACK; m_tok = m_Tknzr.NextToken())
-                    lsIndex.Add(m_tok);
-
-                // get index value
-                EvalPostFix(InFixToPostFix(lsIndex));
-                // calculate address
-                m_Em.CalcArrayAddress(sym.ArrayEnd.ToString(),
-                 sym.Offset.ToString(),
-                 (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR),
-                 "ID() ADDRESS: ");
-
-                // push for assignment
-                m_Em.movReg("EBX", "EAX");
-                m_Em.pushReg("EBX");
-
-                //m_Em.WRSTR("ID ADDRESS:  ");
-                //m_Em.WRINT();
-                //m_Em.WRLN();
-                Match(Token.TOKENTYPE.RIGHT_BRACK);
-            } // ARRAY
+                ArrayID(sym);
             else // type INT
             {
-                // PUSH STACK ADDRESS OF VARIABLE
-                // check the paramater type
-                switch (sym.ParamType)
-                {
-                    case Symbol.PARAMETER_TYPE.LOCAL_VAR:
-                        // push address of variable on the stack -> BP-Offset
-                        m_Em.asm("  movzx EAX, BP     ; mov zero extend");
-                        m_Em.Sub("EAX", sym.Offset.ToString());
-                        m_Em.pushReg("EAX");  // stack address of variable
-                        break;
-                    case Symbol.PARAMETER_TYPE.REF_PARM:
-                        // Address for REF_PARM is at BP+offset or [BP+offset]
-                        //m_Em.movReg("EBX", string.Format("[BP+{0}]", sym.Offset)); // get address passed into function
-                        m_Em.asm(";** Address of REF_PARM - ID()"); // trace
-                        m_Em.asm("  movzx EBX, BP     ; mov zero extend");
-                        m_Em.Add("EBX", sym.Offset.ToString()); // 
-                        m_Em.movReg("EAX", "[EBX]");   // 
-                        m_Em.pushReg("EAX"); 		   // final address of variable
-                        break;
-                    case Symbol.PARAMETER_TYPE.VAL_PARM:
-                    // not implemented
-                    default:
-                        break;
-                } // sym.ParamType
-            } // INT address
+                m_Em.CalcIntAddress(sym.Offset.ToString(), sym.ParamType);
+                // Push address
+                m_Em.pushReg("EAX");
+            }
 
             Match(Token.TOKENTYPE.ASSIGN); // :=
 
@@ -862,8 +834,10 @@ namespace JoshPiler
             // Value to be stored should be in EAX
             //  store the value at proper place:
             m_Em.popReg("ECX");                   // get address from stack
-            m_Em.movReg("[ECX]", "EAX");
-            
+            //if (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR)
+            //    m_Em.movReg(string.Format("[BP-{0}]", sym.Offset), "EAX");
+            //else
+             m_Em.movReg("[ECX]", "EAX");
             Match(Token.TOKENTYPE.SEMI_COLON);
         } // ID()
 
@@ -1344,71 +1318,9 @@ namespace JoshPiler
                             case Symbol.SYMBOL_TYPE.TYPE_SIMPLE:
                                 if (c_bParserASMDebug) m_Em.asm(string.Format(";;; Retrieving Variable: {0}", sym.Name));
                                 // Check if inside a procedure or not
-                                if (m_SymTable.ActiveScope > 0)
-                                {
-                                    switch (sym.ParamType)
-                                    {
-                                        case Symbol.PARAMETER_TYPE.LOCAL_VAR:
-                                            m_Em.movReg("EAX", string.Format("[BP-{0}]", 4 + sym.Offset)); // start at 4
-                                            //m_Em.GetVar(sym.Offset);
-                                            m_Em.pushReg("EAX"); // push EAX
-                                            break;
-                                        case Symbol.PARAMETER_TYPE.VAL_PARM:
-                                            //m_Em.GetVar(sym.RelativeOffset);
-                                            m_Em.movReg("EAX", string.Format("[BP+{0}]", sym.Offset));
-                                            m_Em.pushReg("EAX"); // push EAX
-                                            break;
-										case Symbol.PARAMETER_TYPE.REF_PARM:
-                                            m_Em.asm(";** Get value of REF_PARM - EvalPostFix()"); // trace
-                                            // address of ref var based upon current stack implementation:
-											// little ( j ) ; Implementation:					  
-											// mov EAX, BP+j.offset
-											// push EAX ; abs address of j
-											//
-											// j := 12; Implementation:
-											// mov EAX, [BP+refPar.Offset] ; EAX = absAddress of j
-											// mov [EAX], 12
-											//
-                                            // 00 
-                                            // 04 
-                                            // 08 NEW BP //
-                                            // 0C param c
-											// 10 offset j / param b (4)
-											// 14 param a
-											// 18 
-											// 1C j
-                                            // 20 OLD BP // i = [OLD BP+8]
-
-                                            // Address of reference var is stored like a local var
-                                            //  where instead of the value of the variable being stored
-                                            //  at BP+off it is the address
-                                            m_Em.movReg("EBX", string.Format("[BP+{0}]", sym.Offset));
-                                            m_Em.movReg("EAX", "[EBX]");  // store value at absolute address in EAX
-                                            m_Em.pushReg("EAX"); 		  // push value 
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                }
-                                else // not in a procedure, base scope
-                                {
-                                    switch (sym.ParamType)
-                                    {
-                                        case Symbol.PARAMETER_TYPE.LOCAL_VAR:
-                                            m_Em.movReg("EAX", string.Format("[BP-{0}]", sym.Offset));
-                                            m_Em.pushReg("EAX"); // push EAX
-                                            break;
-                                        case Symbol.PARAMETER_TYPE.REF_PARM:
-                                            m_Em.asm(";*** Address for REF_PARM - EvalPostFix()");
-                                            m_Em.asm("  movzx EBX, BP     ; mov zero extend");
-                                            m_Em.Add("EBX", sym.Offset.ToString()); 
-                                            m_Em.movReg("EAX", "[EBX]");    
-                                            m_Em.pushReg("EAX"); 		   // final address of variable
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                }
+                                m_Em.CalcIntAddress(sym.Offset.ToString(), sym.ParamType);
+                                m_Em.movReg("EBX", "[EAX]");
+                                m_Em.pushReg("EBX");
                                 break;
                             case Symbol.SYMBOL_TYPE.TYPE_CONST:
                                 m_Em.pushInt(sym.Value);

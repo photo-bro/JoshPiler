@@ -172,6 +172,34 @@ namespace JoshPiler
         } // NOT
 
         /// <summary>
+        /// Puts the proper address for int symbol in EAX. offset is the symbol offset,
+        /// and Param_Type is the parameter type.
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <param name="Param_Type"></param>
+        public void CalcIntAddress(string offset, Symbol.PARAMETER_TYPE Param_Type)
+        {
+            asm("  movzx EAX, BP     ; mov zero extend");
+            switch (Param_Type)
+            {
+                case Symbol.PARAMETER_TYPE.LOCAL_VAR:
+                    Sub("EAX", offset);
+                    //movReg("EAX", "[BP-" + offset + "]");
+                    break;
+                case Symbol.PARAMETER_TYPE.REF_PARM:
+                    Add("EAX", offset);
+                    //movReg("EAX", "[BP+" + offset + "]");
+                    movReg("EBX", "[EAX]");
+                    movReg("EAX", "EBX");
+                    break;
+                case Symbol.PARAMETER_TYPE.VAL_PARM:
+                    Add("EAX", offset);
+                    //movReg("EAX", "[BP+" + offset + "]");
+                    break;
+            }
+        } // CalcIntAddress
+
+        /// <summary>
         /// Puts the proper address for array[index] in EAX. Value of index must be in
         /// EAX. end is the end of the array, offset is the symbol offset. local
         /// determines if array is a reference or local var
@@ -182,11 +210,11 @@ namespace JoshPiler
 
             asm(";// Calculate index offset from base. First move index to EBX");
             movReg("EBX", "EAX"); 	                      // put index in ebx
-            //asm(";// Offset = Base + (End - Index) * 4. Array End:");
+            //asm(";// Offset = Base - (End - Index) * 4. Array End:");
             movReg("EAX", end);      // Array end in eax
-            //asm(";// End- Index(EBX):");
+            //asm(";// End - Index(EBX):");
             Sub("EAX", "EBX"); 				          // get proper offset-> ArrEnd - Index
-            //asm(";// (End- Index(EBX)) * 4:");
+            //asm(";// (End - Index(EBX)) * 4:");
             iMul("EAX", "4");					          // multiply by int size
 
             //asm(";// EBX = Base");
@@ -211,9 +239,9 @@ namespace JoshPiler
             Sub("EBX", "EAX");
             movReg("EAX", "EBX");
 
-            WRSTR(s);
-            WRINT();
-            WRLN();
+            //WRSTR(s);
+            //WRINT();
+            //WRLN();
         } // CalcArrayAddress
 
         /// <summary>
