@@ -172,6 +172,48 @@ namespace JoshPiler
         } // NOT
 
         /// <summary>
+        /// Puts the proper address for array[index] in EAX. Value of index must be in
+        /// EAX. end is the end of the array, offset is the symbol offset. local
+        /// determines if array is a reference or local var
+        /// </summary>
+        public void CalcArrayAddress(string end, string offset, bool local)
+        {
+            // BaseOffset + (ArrayEnd - Index) * IntSize
+
+            asm(";// Calculate index offset from base. First move index to EBX");
+            movReg("EBX", "EAX"); 	                      // put index in ebx
+            //asm(";// Offset = Base + (End - Index) * 4. Array End:");
+            movReg("EAX", end);      // Array end in eax
+            //asm(";// End- Index(EBX):");
+            Sub("EAX", "EBX"); 				          // get proper offset-> ArrEnd - Index
+            //asm(";// (End- Index(EBX)) * 4:");
+            iMul("EAX", "4");					          // multiply by int size
+
+            //asm(";// EBX = Base");
+            // Get BaseOffset
+            // if local it is just at Sym.offset (offset)
+            // if refernce it is at [BP+offset]
+            if (local)
+                movReg("EBX", offset);        // EBX = base
+            else
+            {
+                // Get address of whole array
+                asm("  movzx ECX, BP     ; mov zero extend");
+                Add("ECX", offset); // 
+                movReg("EBX", "[ECX]");   // Address of base of array in ECX
+                //asm(";// EBX = Base + (End - Index) * 4:");
+            }
+
+            // Add calculated offset to BaseOffset
+            Add("EAX", "EBX");                 // Add index offset to array base
+
+            // Calculate final offset from BP
+            asm("  movzx EBX, BP     ; mov zero extend");
+            Sub("EBX", "EAX");
+            movReg("EAX", "ECX");
+        }
+
+        /// <summary>
         /// Compare the last two values in the stack. Result is pushed back on stack. 1 = true,
         /// 0 = false;
         /// </summary>
@@ -358,7 +400,7 @@ namespace JoshPiler
         public void ExitProc()
         {
             AddToProcInc("  pop     BP    ;");
-            AddToProcInc("  ret     0     ;");
+            AddToProcInc("  ret          ;");
             AddToProcInc(string.Format("{0} ENDP", c_FM.MainProcName));
             AddToProcInc(";============== END PROCEDURE ==============");
         } // ExitProc()
@@ -410,6 +452,7 @@ namespace JoshPiler
                 //    to contain string constants of the form:
                 + ";===== string constants inserted here: ======\r\n"
                 + "INCLUDE strings.inc\r\n\r\n"     // strings.inc
+                
 
                 + ".CODE\r\n"
                 + "INCLUDE io.mac\r\n"

@@ -26,6 +26,9 @@ namespace JoshPiler
         private Token m_tok;
 
         // memory offset - default 32bit offset 
+        /// <summary>
+        /// Scope 0 memory offset, 0 = BP, start at 4
+        /// </summary>
         private int m_iOff = 4; // start at 4, 0 is BP
 
         // label level
@@ -110,6 +113,7 @@ namespace JoshPiler
                 // print symbol table
                 Function();
             } // while
+
         } // ParseFile
 
         /// <summary>
@@ -480,11 +484,25 @@ namespace JoshPiler
             ParseLoop();
 
             if (c_bParserASMDebug) m_Em.asm("; Epilogue  ;;;;;;;;");
+
             // Deallocate variables (readjust stack)
-            m_Em.movReg("SP", "BP");
+            //m_Em.movReg("SP", "BP");
+
+            m_Em.Add("SP", (iLocalVarSpace).ToString());
 
             // Restore old basepointer
             m_Em.popReg("BP");
+
+            //// restore calling stack
+            //int iOffset = 0;
+            //scpActive.Symbols.ToList().ForEach(s =>
+            //{
+            //    if (s.ParamType != Symbol.PARAMETER_TYPE.LOCAL_VAR)
+            //        iOffset += 4;//(s.ArrayEnd - s.BaseOffset) * 4;
+            //    //else
+            //    //    iOffset += 4;
+            //});
+            //m_Em.Add("SP", (iLocalVarSpace).ToString());
 
             // Print return instruction
             m_Em.asm("ret     ; Return to calling code");
@@ -525,14 +543,15 @@ namespace JoshPiler
                 ParseLoop();
 
                 // Restore stack
-                if (m_iOff > 4) m_Em.Add("SP", (m_iOff-4).ToString());
-
+                //if (m_iOff > 4) m_Em.Add("SP", (m_iOff-8).ToString());
+                m_Em.movReg("SP", "BP");
                 // match end
                 Match(Token.TOKENTYPE.END);
                 Match(Token.TOKENTYPE.ID);
                 Match(Token.TOKENTYPE.DOT);
-
                 // Exit main procedure
+
+
                 m_Em.ExitProc();
             } // if BEGIN
         } // Function
@@ -666,6 +685,82 @@ namespace JoshPiler
             //m_tok = m_Tknzr.NextToken();
         } // WRINT()
 
+        private void ProcID(Symbol sym)
+        {
+            // ***** PROCEDURE ***** //
+            // Parse argument list, pushing each value onto the stack
+            // little ( k ) ;
+            int iArgCount = 0;
+            m_tok = m_Tknzr.NextToken();
+            Match(Token.TOKENTYPE.LEFT_PAREN);
+
+            // Parse arguments and prep for procedure call
+            List<List<Token>> lslsArgs = new List<List<Token>>(); // hold the arguments, list of token (expression) lists
+            for (; m_tok.m_tokType != Token.TOKENTYPE.SEMI_COLON; m_tok = m_Tknzr.NextToken())
+            {
+                // parse argument into EAX
+                List<Token> lsArg = new List<Token>();
+                for (; m_tok.m_tokType != Token.TOKENTYPE.COMMA && m_tok.m_tokType != Token.TOKENTYPE.RIGHT_PAREN;
+                    m_tok = m_Tknzr.NextToken())
+                    lsArg.Add(m_tok);
+                lslsArgs.Add(lsArg); // add argument expression to list of arg expressions
+                ++iArgCount; // used when restoring the stack
+            } // Get arguments
+            // Must push arguments in reverse order
+            for (int i = iArgCount; i > 0; --i)
+            {
+                // if proc is reference then push just BP-Off not [BP-Off]
+                if (sym.SymType == Symbol.SYMBOL_TYPE.TYPE_REFPROC)
+                {
+                    Symbol syRef = FindSymbol(lslsArgs[i - 1][0].m_strName);
+
+                    switch (syRef.SymType)
+                    {
+                        case Symbol.SYMBOL_TYPE.TYPE_ARRAY:
+                        case Symbol.SYMBOL_TYPE.TYPE_SIMPLE:
+                            m_Em.asm("  movzx EAX, BP     ; mov zero extend");
+                            m_Em.Sub("EAX", syRef.Offset.ToString());
+                            m_Em.pushReg("EAX"); 		   // final address of variable
+                            continue;
+                        //case Symbol.SYMBOL_TYPE.TYPE_ARRAY:
+                        //    // Check if whole array or just an value in the array passed in
+                        //    if (lslsArgs[i - 1].Count == 1) // whole array, just send in offset, make sure to adjust whole offset
+                        //    {
+                        //        m_Em.asm("  movzx EAX, BP     ; mov zero extend");
+                        //        m_Em.Sub("EAX", syRef.Offset.ToString());
+                        //        m_Em.pushReg("EAX"); 		   // final address of variable
+                        //    }
+                        //    else // value in array
+                        //    {
+                        //        // calculate index referenced [ exp ]
+                        //        EvalPostFix(InFixToPostFix(lslsArgs[i - 1]));
+                        //        m_Em.iMul("EAX", "4");           // calc offset => index*sizeof(int)
+                        //        m_Em.movReg("EBX", "EAX");
+                        //        m_Em.asm("  movzx EAX, BP     ; mov zero extend");
+                        //        m_Em.Sub("EAX", "EBX");
+                        //        m_Em.pushReg("EAX");
+                        //    }
+                        //    continue;
+                        default:
+                            break;
+                    }
+                }
+                // Get value into EAX then push onto stack
+                EvalPostFix(InFixToPostFix(lslsArgs[i - 1]));
+                m_Em.pushReg("EAX");
+            } // Push parameters for function
+
+            Match(Token.TOKENTYPE.SEMI_COLON);
+
+            // Call function
+            m_Em.asm(string.Format("call     {0}     ; PROCEDURE {0}", sym.Name));
+
+            // restore stack
+            int iOffset = 0;
+
+            m_Em.Add("SP", (lslsArgs.Count * 4).ToString());
+        }
+
         /// <summary>
         /// Parse Assignment function
         /// ex. ID := Expression;
@@ -686,111 +781,8 @@ namespace JoshPiler
                     return; // get out of function
                 case Symbol.SYMBOL_TYPE.TYPE_REFPROC:
                 case Symbol.SYMBOL_TYPE.TYPE_PROC:
-                    // ***** PROCEDURE ***** //
-                    // Parse argument list, pushing each value onto the stack
-                    // little ( k ) ;
-                    int iArgCount = 0;
-                    m_tok = m_Tknzr.NextToken();
-                    Match(Token.TOKENTYPE.LEFT_PAREN);
-
-                    // Parse arguments and prep for procedure call
-                    List<List<Token>> lslsArgs = new List<List<Token>>(); // hold the arguments, list of token (expression) lists
-                    for (; m_tok.m_tokType != Token.TOKENTYPE.SEMI_COLON; m_tok = m_Tknzr.NextToken())
-                    {
-                        // parse argument into EAX
-                        List<Token> lsArg = new List<Token>();
-                        for (; m_tok.m_tokType != Token.TOKENTYPE.COMMA &&m_tok.m_tokType != Token.TOKENTYPE.RIGHT_PAREN;
-                            m_tok = m_Tknzr.NextToken())
-                            lsArg.Add(m_tok);
-                        lslsArgs.Add(lsArg); // add argument expression to list of arg expressions
-                        ++iArgCount; // used when restoring the stack
-                    } // Get arguments
-                    // Must push arguments in reverse order
-                    for (int i = iArgCount; i > 0; --i)
-                    {
-                        // if proc is reference then push just BP-Off not [BP-Off]
-                        if (sym.SymType == Symbol.SYMBOL_TYPE.TYPE_REFPROC)
-                        {
-                            Symbol syRef = FindSymbol(lslsArgs[i - 1][0].m_strName);
-
-                            switch (syRef.SymType)
-                            {
-                                case Symbol.SYMBOL_TYPE.TYPE_ARRAY:
-                                case Symbol.SYMBOL_TYPE.TYPE_SIMPLE:
-                                    m_Em.asm("  movzx EAX, BP     ; mov zero extend");
-                                    m_Em.Sub("EAX", syRef.Offset.ToString());
-                                    m_Em.pushReg("EAX"); 		   // final address of variable
-                                    continue;
-                                //case Symbol.SYMBOL_TYPE.TYPE_ARRAY:
-                                //    // Check if whole array or just an value in the array passed in
-                                //    if (lslsArgs[i - 1].Count == 1) // whole array, just send in offset, make sure to adjust whole offset
-                                //    {
-                                //        m_Em.asm("  movzx EAX, BP     ; mov zero extend");
-                                //        m_Em.Sub("EAX", syRef.Offset.ToString());
-                                //        m_Em.pushReg("EAX"); 		   // final address of variable
-                                //    }
-                                //    else // value in array
-                                //    {
-                                //        // calculate index referenced [ exp ]
-                                //        EvalPostFix(InFixToPostFix(lslsArgs[i - 1]));
-                                //        m_Em.iMul("EAX", "4");           // calc offset => index*sizeof(int)
-                                //        m_Em.movReg("EBX", "EAX");
-                                //        m_Em.asm("  movzx EAX, BP     ; mov zero extend");
-                                //        m_Em.Sub("EAX", "EBX");
-                                //        m_Em.pushReg("EAX");
-                                //    }
-                                //    continue;
-                                default:
-                                    break;
-                            }
-                        }
-                        // Get value into EAX then push onto stack
-                        EvalPostFix(InFixToPostFix(lslsArgs[i-1]));
-                        m_Em.pushReg("EAX");
-                    } // Push parameters for function
-
-                    Match(Token.TOKENTYPE.SEMI_COLON);
-
-                    // Call function
-                    m_Em.asm(string.Format("call     {0}     ; PROCEDURE {0}", sym.Name));
-
-                    // restore stack
-                    int iOffset = 0;
-                    
-                    // Get offset based off of arguments
-                    // Get list of symbols
-                    foreach (List<Token> lt in lslsArgs)
-                    {
-                        foreach (Token t in lt)
-                        {
-                            if (m_SymTable.FindSymbol(t.m_strName) == null) continue;
-                            switch (m_SymTable.FindSymbol(t.m_strName).SymType)
-                            {
-                                case Symbol.SYMBOL_TYPE.TYPE_SIMPLE:
-                                    iOffset += 4;
-                                    break;
-                                case Symbol.SYMBOL_TYPE.TYPE_ARRAY:
-                                    // Pass by reference, just passing in a pointer needs only 4 bytes
-                                    if (sym.SymType == Symbol.SYMBOL_TYPE.TYPE_REFPROC)
-                                        iOffset += 4;
-                                    
-                                    // by value, either whole array or single value
-                                    else
-                                    {
-                                        // check if passing in the whole array or just an offset
-                                        if (lt.Count == 1)
-                                            iOffset += (m_SymTable.FindSymbol(t.m_strName).ArrayEnd -
-                                                m_SymTable.FindSymbol(t.m_strName).BaseOffset) * 4;
-                                        else
-                                            iOffset += 4;
-                                    }
-                                    continue;
-                            } // switch
-                        } // for t
-                    } // for lt
-
-                    m_Em.Add("SP", iOffset.ToString());
-                    return; // no need to go through rest of function, exit
+                    ProcID(sym);
+                    return;
                 default:
                     break;
             } // SymType 
@@ -815,7 +807,7 @@ namespace JoshPiler
                     case Symbol.PARAMETER_TYPE.LOCAL_VAR:
                         // Get value for the proper index
                         // Offset for BP:
-                        // BaseOffset + (ArrayEnd - Index) * IntSize
+                        // Offset + (ArrayEnd - Index) * IntSize
 
                         //m_Em.GetVar(symNdx.Offset);                     // get index value
                         EvalPostFix(InFixToPostFix(lsIndex));
@@ -838,21 +830,38 @@ namespace JoshPiler
                     case Symbol.PARAMETER_TYPE.REF_PARM:
 
                         // BaseOffset + (ArrayEnd - Index) * IntSize
+                        // BaseOffset = Address of Array
 
                         //m_Em.GetVar(symNdx.Offset);                     // get index value
                         EvalPostFix(InFixToPostFix(lsIndex));
                         m_Em.asm(";//// REF Array Assign. Index ^ Offset Calculation below: "); // trace
+
+                        m_Em.asm(";// Calculate index offset from base. First move index to EBX");
                         m_Em.movReg("EBX", "EAX"); 	                      // put index in ebx
+                        m_Em.asm(";// Offset = Base + (End - Index) * 4. Array End:");
                         m_Em.movReg("EAX", sym.ArrayEnd.ToString());      // Array end in eax
+                        m_Em.asm(";// End- Index(EBX):");
                         m_Em.Sub("EAX", "EBX"); 				          // get proper offset-> ArrEnd - Index
+                        m_Em.asm(";// (End- Index(EBX)) * 4:");
                         m_Em.iMul("EAX", "4");					          // multiply by int size
 
                         // Get address of whole array
+                        // [BP+refSym.offset]
+                        m_Em.asm(";// EBX = *Base");
                         m_Em.asm("  movzx EBX, BP     ; mov zero extend");
                         m_Em.Add("EBX", sym.Offset.ToString()); // 
-                        m_Em.movReg("ECX", "[EBX]");   // 
-                        m_Em.Add("ECX", "EAX");                 // Add index offset to array offset
-                        m_Em.pushReg("ECX"); 		   // final address of variable
+                        m_Em.asm(";// ECX = Base");
+                        m_Em.movReg("ECX", "[EBX]");   // Address of base of array in ECX
+                        m_Em.asm(";// ECX = Base + (End - Index) * 4:");
+                        m_Em.Add("ECX", "EAX");                 // Add index offset to array base
+
+                        m_Em.asm(";// TRACE PRINT: ");
+                        m_Em.movReg("EAX", "ECX");
+                        m_Em.WRSTR("ID() - Array Ref_Parm - Address in EAX: ");
+                        m_Em.WRINT();
+                        m_Em.WRLN();
+
+                        m_Em.pushReg("EAX"); 		   // final address of variable
 
                         m_Em.asm(";//// value assigned to Array");
                         break;
@@ -1033,7 +1042,7 @@ namespace JoshPiler
             EvalPostFix(InFixToPostFix(inFix));
             // if EAX is one then statement is true and jump to IF
             m_Em.Compare("EAX", "1");
-            m_Em.Jump("je", sEndLabel);
+            m_Em.Jump("jge", sEndLabel);
 
             //// evaluate inside loop
             ParseLoop();
@@ -1524,19 +1533,39 @@ namespace JoshPiler
                                         // BaseOffset + (ArrayEnd - Index) * sizeof(int)
 
                                         // index in eax
-                                        m_Em.movReg("EBX", sym.ArrayEnd.ToString());
-                                        m_Em.Sub("EBX", "EAX");
-                                        m_Em.iMul("EBX", "4");      // calculate offset of for index
+                                       // m_Em.movReg("EBX", sym.ArrayEnd.ToString());
+                                       // m_Em.Sub("EBX", "EAX");
+                                       // m_Em.iMul("EBX", "4");      // calculate offset of for index
 
-                                        // Get address of array
-                                        m_Em.Add("ECX", sym.Offset.ToString()); 
-                                        m_Em.movReg("EBX", "[ECX]");
-                                        m_Em.Add("EAX", "EBX");
+                                       // // Get address of array
+                                       // m_Em.Add("ECX", sym.Offset.ToString()); 
+                                       // m_Em.movReg("EBX", "[ECX]");
+                                       // m_Em.Add("EAX", "EBX");
 
 
-                                       // retrieve final value
-                                        m_Em.movReg("EAX", "[EBX]");  // store value at address
-                                        m_Em.pushReg("EAX"); 		  // push value 
+                                       //// retrieve final value
+                                       // m_Em.movReg("EAX", "[EBX]");  // store value at address
+                                       // m_Em.pushReg("EAX"); 		  // push value 
+
+                                        m_Em.asm(";// Calculate index offset from base");
+                                        m_Em.movReg("EBX", "EAX"); 	                      // put index in ebx
+                                        m_Em.movReg("EAX", sym.ArrayEnd.ToString());      // Array end in eax
+                                        m_Em.Sub("EAX", "EBX"); 				          // get proper offset-> ArrEnd - Index
+                                        m_Em.iMul("EAX", "4");					          // multiply by int size
+
+                                        // Get address of whole array
+                                        // [BP+refSym.offset]
+                                        m_Em.asm(";// Get base offset from proc argument");
+                                        m_Em.asm("  movzx EBX, BP     ; mov zero extend");
+                                        m_Em.Add("EBX", sym.Offset.ToString()); // 
+                                        m_Em.movReg("ECX", "[EBX]");   // Address of base of array in ECX
+                                        m_Em.movReg("EAX", "[ECX]");   // value at address in ECX in EAX
+                                        m_Em.WRSTR("EvalPostFix - Array Ref_Parm - EAX: ");
+                                        m_Em.WRINT();
+                                        m_Em.WRLN();
+                                        
+
+
 
                                         break;
                                     case Symbol.PARAMETER_TYPE.LOCAL_VAR:
@@ -1552,8 +1581,15 @@ namespace JoshPiler
                                         // calcuate address from calculated offset
                                         m_Em.asm("  movzx ECX, BP     ; mov zero extend");
                                         m_Em.Sub("ECX", "EAX");                           // address of array element
-                                        m_Em.movReg("EAX", "[ECX]");                      // get value
-                                        m_Em.pushReg("EAX");
+                                        m_Em.movReg("EAX", "ECX");
+
+                                        m_Em.WRSTR("EvalPostFix - Array LocalVar - Address in EAX: ");
+                                        m_Em.WRINT();
+                                        m_Em.WRLN();
+
+
+                                        m_Em.movReg("EBX", "[EAX]");                      // get value
+                                        m_Em.pushReg("EBX");
                                         ++i;						                      // increment counter (count over index)
 
                                         break;
