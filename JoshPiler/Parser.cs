@@ -140,7 +140,7 @@ namespace JoshPiler
             int iCallScope = m_SymTable.ActiveScope;
 
             // consume PROCEDURE token
-            m_tok = m_Tknzr.NextToken(); 
+            m_tok = m_Tknzr.NextToken();
 
             // look up proc ID, check for redeclaration
             Symbol procSym = m_SymTable.FindSymbol(m_tok.m_strName);
@@ -344,10 +344,10 @@ namespace JoshPiler
         private void VarDef(int scope = 0, int baseoffset = -1, Symbol.PARAMETER_TYPE Paramater_Type = Symbol.PARAMETER_TYPE.LOCAL_VAR)
         {
             List<string> lsIDs = new List<string>();
-            
+
             // stack offset to access variable
             // check if using local or global offset
-            int  iOffset = (baseoffset < 0) ? m_iOff : baseoffset;
+            int iOffset = (baseoffset < 0) ? m_iOff : baseoffset;
 
             // loop through all var definitions (ex. i, k, j : INTEGER)
             while (m_tok.m_tokType != Token.TOKENTYPE.COLON)
@@ -400,7 +400,7 @@ namespace JoshPiler
                             ErrorHandler.Error(ERROR_CODE.TOKEN_INVALID, m_tok.m_iLineNum,
                                 "Expecting INTEGER, CARDINAL, or REAL token");
                         else
-						// ARRAY
+                            // ARRAY
                             m_SymTable.AddSymbol(new Symbol(s, scope, Symbol.SYMBOL_TYPE.TYPE_ARRAY, Symbol.STORAGE_TYPE.TYPE_INT,
                                 Paramater_Type, iOffset, 0, sym.BaseOffset, sym.ArrayEnd));
                         iOffset += (sym.ArrayEnd - sym.BaseOffset) * 4; // memory offset of array-> sizeof(int)*(EndIndex - BeginIndex)
@@ -468,7 +468,7 @@ namespace JoshPiler
             if (c_bParserASMDebug) m_Em.asm("; Make room for local variables ;;;;;;;;");
             int iArg = 0, iLocalVarSpace = 0;
             foreach (Symbol sym in scpActive.Symbols)
-                if (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR 
+                if (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR
                     && sym.SymType == Symbol.SYMBOL_TYPE.TYPE_SIMPLE) ++iArg;
             iLocalVarSpace = 4 + (4 * (iArg)); // integer variables
 
@@ -484,7 +484,8 @@ namespace JoshPiler
             // Get all Array symbols into a list
             lsArrays.AddRange(scpActive.Symbols.ToList().FindAll(sym => sym.SymType.Equals(Symbol.SYMBOL_TYPE.TYPE_ARRAY)));
             // Get all offsets
-            lsArrays.ForEach(sym => {
+            lsArrays.ForEach(sym =>
+            {
                 if (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR)
                     iLocalVarSpace += (sym.ArrayEnd - sym.BaseOffset) * 4; ;
             });
@@ -550,7 +551,7 @@ namespace JoshPiler
                 m_Em.EnterProc();
 
                 // Make room for local variables
-                if (m_iOff > 4) m_Em.Sub("SP", (m_iOff-4).ToString());
+                if (m_iOff > 4) m_Em.Sub("SP", (m_iOff - 4).ToString());
 
                 // parse content
                 ParseLoop();
@@ -732,21 +733,21 @@ namespace JoshPiler
                 if (sym.SymType == Symbol.SYMBOL_TYPE.TYPE_REFPROC)
                 {
                     Symbol symRefArg = m_SymTable.FindSymbol(lslsArgs[i - 1][0].m_strName);
-                    
+
                     m_Em.asm(";// Push REF addresses for: " + symRefArg.Name + " in PROCEDURE: " + sym.Name);
                     m_Em.asm(";// PARAM: " + symRefArg.ParamType.ToString());
                     // int
-                    if (lslsArgs[i-1].Count == 1)
+                    if (lslsArgs[i - 1].Count == 1)
                         m_Em.CalcIntAddress(symRefArg.Offset.ToString(), symRefArg.ParamType);
                     // array
                     else
                     {
                         // Evaluate index
-                        List<Token> ltIndex = lslsArgs[i-1].GetRange(2, lslsArgs[i-1].Count - 3);
+                        List<Token> ltIndex = lslsArgs[i - 1].GetRange(2, lslsArgs[i - 1].Count - 3);
 
                         EvalPostFix(InFixToPostFix(ltIndex));
 
-                        m_Em.CalcArrayAddress(symRefArg.BaseOffset.ToString(), symRefArg.Offset.ToString(), 
+                        m_Em.CalcArrayAddress(symRefArg.BaseOffset.ToString(), symRefArg.Offset.ToString(),
                             symRefArg.ParamType, ";///ProcID Offset: ");
                     }
 
@@ -795,7 +796,7 @@ namespace JoshPiler
 
         /// <summary>
         /// Parse Assignment function
-        /// ex. ID := Expression;
+        /// ex. ID := Expression ;
         /// </summary>
         private void ID()
         {
@@ -817,7 +818,7 @@ namespace JoshPiler
 
             // consume token
             m_tok = m_Tknzr.NextToken(); // ID
-        
+
             // Check if ARRAY, get proper offset
             if (m_tok.m_tokType == Token.TOKENTYPE.LEFT_BRACK)
                 ArrayID(sym);
@@ -832,7 +833,7 @@ namespace JoshPiler
             // Get value to be stored
             if (m_tok.m_tokType == Token.TOKENTYPE.RDINT)
             {
-                m_Em.RDINT();                  // get int from user
+                m_Em.RDINT();
                 m_tok = m_Tknzr.NextToken();
                 Match(Token.TOKENTYPE.LEFT_PAREN);
                 Match(Token.TOKENTYPE.RIGHT_PAREN);
@@ -842,11 +843,9 @@ namespace JoshPiler
 
             // Value to be stored should be in EAX
             //  store the value at proper place:
-            m_Em.popReg("EDI");                   // get address from stack
-            //if (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR)
-            //    m_Em.movReg(string.Format("[BP-{0}]", sym.Offset), "EAX");
-            //else
-             m_Em.movReg("[EDI]", "EAX");
+            m_Em.popReg("EDI");
+
+            m_Em.movReg("[EDI]", "EAX");
             Match(Token.TOKENTYPE.SEMI_COLON);
         } // ID()
 
@@ -1122,7 +1121,7 @@ namespace JoshPiler
                         } // if not neg
                         break;
                     case Token.TOKENTYPE.ID:
-                        
+
                         // Check if ARRAY
                         if (j + 1 < lsExpression.Count && lsExpression[j + 1].m_tokType /*m_Tknzr.PeekToken().m_tokType*/
                             == Token.TOKENTYPE.LEFT_BRACK)
@@ -1337,7 +1336,8 @@ namespace JoshPiler
                             case Symbol.SYMBOL_TYPE.TYPE_ARRAY:
                                 // Postfix should be such as ARRAY[postfix exp] so 1+list[2*3] => 1list[23*]+
 
-                                i += 2;        // move over '[' to postfix exp
+                                // move over '[' to postfix exp
+                                i += 2;
 
                                 // get postfix exp as token list
                                 List<Token> ltIndex = new List<Token>();
@@ -1365,13 +1365,13 @@ namespace JoshPiler
                                 m_Em.CalcArrayAddress(sym.ArrayEnd.ToString(), sym.Offset.ToString(),
                                     sym.ParamType, "EVALPOSTFIX ADDRESS: ");
 
-                                m_Em.movReg("EBX", "[EAX]");   
+                                m_Em.movReg("EDI", "EAX");
+                                m_Em.movReg("EBX", "[EDI]");
                                 m_Em.pushReg("EBX");
                                 if (c_bParserASMDebug) m_Em.asm(";;;; END EVAL ARRAY");
                                 break;
                             default:
                                 break;
-                        
                         } // switch
                         break;
                     case Token.TOKENTYPE.INT_NUM:

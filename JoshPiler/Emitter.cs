@@ -179,7 +179,7 @@ namespace JoshPiler
         /// <param name="Param_Type"></param>
         public void CalcIntAddress(string offset, Symbol.PARAMETER_TYPE Param_Type)
         {
-            asm("  movzx EDI, BP     ; mov zero extend");
+            asm("  movzx EDI, BP");
             switch (Param_Type)
             {
                 case Symbol.PARAMETER_TYPE.LOCAL_VAR:
@@ -211,7 +211,7 @@ namespace JoshPiler
             Sub("EAX", "EBX");
             iMul("EAX", "4");
 
-            asm("  movzx EDI, BP     ; mov zero extend");
+            asm("  movzx EDI, BP");
 
             // Get offset
             switch (Param_Type)
