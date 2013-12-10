@@ -19,14 +19,14 @@ namespace JoshPiler
         // Compiler name 
         private string m_sCompName = "JoshPiler";
         // Version
-        private string m_sVer = "1.02a";
+        private string m_sVer = "1.1alpha";
 
         private Filer m_filer = new Filer();
 
         // Default paths and filenames
         private string m_sMASMdir = "F:\\Compilers\\MASM32";
         private string m_sLastFilePath = "F:\\Compilers\\MODS";
-        private string m_sLastFileName = "ArrTest.mod";
+        private string m_sLastFileName = "18_Bubl.mod";
 
         // Main Proc name
         private string m_sMainProc = "PJoshPiler_Main";

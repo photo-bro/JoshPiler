@@ -179,67 +179,60 @@ namespace JoshPiler
         /// <param name="Param_Type"></param>
         public void CalcIntAddress(string offset, Symbol.PARAMETER_TYPE Param_Type)
         {
-            asm("  movzx EAX, BP     ; mov zero extend");
+            asm("  movzx EDI, BP     ; mov zero extend");
             switch (Param_Type)
             {
                 case Symbol.PARAMETER_TYPE.LOCAL_VAR:
-                    Sub("EAX", offset);
-                    //movReg("EAX", "[BP-" + offset + "]");
+                    Sub("EDI", offset);
                     break;
                 case Symbol.PARAMETER_TYPE.REF_PARM:
-                    Add("EAX", offset);
-                    //movReg("EAX", "[BP+" + offset + "]");
-                    movReg("EBX", "[EAX]");
-                    movReg("EAX", "EBX");
-                    break;
+                    //Add("EDI", offset);
+                    movReg("EAX", "[EDI+" + offset + "]");
+                    return;
                 case Symbol.PARAMETER_TYPE.VAL_PARM:
-                    Add("EAX", offset);
-                    //movReg("EAX", "[BP+" + offset + "]");
+                    Add("EDI", offset);
                     break;
             }
+
+            movReg("EAX", "EDI");
         } // CalcIntAddress
 
         /// <summary>
         /// Puts the proper address for array[index] in EAX. Value of index must be in
         /// EAX. end is the end of the array, offset is the symbol offset. local
-        /// determines if array is a reference or local var
+        /// determines if array is a reference or local var. Base offset is the base (so Arr[2..5] 
+        /// it would be 2 ]
         /// </summary>
-        public void CalcArrayAddress(string end, string offset, bool local, string s = "")
+        public void CalcArrayAddress(string end, string offset, Symbol.PARAMETER_TYPE Param_Type, string comment = "")
         {
-            // ArrayBase - (ArrayEnd - Index) * IntSize
+            // (BP~offset) - ((ArrayEnd - Index) * 4)
+            movReg("EBX", "EAX"); 	                
+            movReg("EAX", end);  
+            Sub("EAX", "EBX");
+            iMul("EAX", "4");
 
-            asm(";// Calculate index offset from base. First move index to EBX");
-            movReg("EBX", "EAX"); 	                      // put index in ebx
-            //asm(";// Offset = Base - (End - Index) * 4. Array End:");
-            movReg("EAX", end);      // Array end in eax
-            //asm(";// End - Index(EBX):");
-            Sub("EAX", "EBX"); 				          // get proper offset-> ArrEnd - Index
-            //asm(";// (End - Index(EBX)) * 4:");
-            iMul("EAX", "4");					          // multiply by int size
+            asm("  movzx EDI, BP     ; mov zero extend");
 
-            //asm(";// EBX = Base");
-            // Get ArrayOffset
-            // if local it is just at Sym.offset (offset)
-            // if refernce it is at [BP+offset]
-            if (local)
+            // Get offset
+            switch (Param_Type)
             {
-                asm("  movzx EBX, BP");
-                Sub("EBX", offset.ToString());
+                case Symbol.PARAMETER_TYPE.LOCAL_VAR:
+                    Sub("EDI", offset);
+                    movReg("EBX", "EDI");
+                    break;
+                case Symbol.PARAMETER_TYPE.REF_PARM:
+                    // Get address of whole array
+                    movReg("EBX", "[EDI+" + offset + "]");
+                    break;
+                case Symbol.PARAMETER_TYPE.VAL_PARM:
+                default:
+                    break;
             }
-            else
-            {
-                // Get address of whole array
-                asm("  movzx ECX, BP     ; mov zero extend");
-                Add("ECX", offset); // 
-                movReg("EBX", "[ECX]");   // Address of base of array in ECX
-                //asm(";// EBX = Base + (End - Index) * 4:");
-            }
-
             // Calculate final offset from BP
             Sub("EBX", "EAX");
             movReg("EAX", "EBX");
 
-            //WRSTR(s);
+            //WRSTR(comment);
             //WRINT();
             //WRLN();
         } // CalcArrayAddress

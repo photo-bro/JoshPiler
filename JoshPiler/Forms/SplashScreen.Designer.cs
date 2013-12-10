@@ -47,8 +47,8 @@
             // lbPress
             // 
             this.lbPress.AutoSize = true;
-            this.lbPress.BackColor = System.Drawing.Color.White;
-            this.lbPress.Location = new System.Drawing.Point(163, 353);
+            this.lbPress.BackColor = System.Drawing.Color.Transparent;
+            this.lbPress.Location = new System.Drawing.Point(163, 342);
             this.lbPress.Name = "lbPress";
             this.lbPress.Size = new System.Drawing.Size(166, 13);
             this.lbPress.TabIndex = 1;

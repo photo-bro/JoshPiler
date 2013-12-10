@@ -13,7 +13,7 @@ namespace JoshPiler
 
         // Optimizer options
         public static bool c_bDupPushPop = true;
-        public static bool c_bRedunMov = true;
+        public static bool c_bRedunMov = false;
 
         // Lock object
         private static object c_opLock = new Object();
@@ -61,7 +61,7 @@ namespace JoshPiler
             }
 
             // skip extra line when bool
-            bool b = false;
+            bool bSkipLine = false;
 
             // check each line for the dups
             for (int i = 0; i < lsLines.Count; ++i)
@@ -86,7 +86,7 @@ namespace JoshPiler
                         // second word should be register
                         if (words1[1].ToUpper() == words2[1].ToUpper())
                         {
-                            b = true;   // skip extra line
+                            bSkipLine = true;   // skip extra line
                             continue;
                         } // check for register
                     }
@@ -100,18 +100,22 @@ namespace JoshPiler
                     // check for next mov
                     else if (lsLines[i + 1].ToUpper().Contains("MOV") && !lsLines[i + 1].Contains("["))
                     {
+                        //   0   1    2
+                        // 1 mov ebx, [eax]
+                        // 2 mov eax, ebx
+                        if (words1[2].Contains(words2[1].ToUpper())) continue;
                         if (words1[1] == words2[2])
                         {
-                            sb.Append(string.Format("   mov     {0}, {1};          optimized redundant mov's\r\n",
+                            sb.Append(string.Format("  mov     {0}, {1};          optimized redundant mov's\r\n",
                                 words2[1], words1[2]));
-                            b = true;
+                            bSkipLine = true;
                             continue;
                         } // compare registers
                     } // if next line contains mov
                 } // if line contains mov
-                if (!b)
+                if (!bSkipLine)
                     sb.Append(lsLines[i] + "\r\n");
-                b = false;
+                bSkipLine = false;
             } // for
             if (passes > 0)
                 return OptimizeASM(sb.ToString(), --passes);

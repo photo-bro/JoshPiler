@@ -31,14 +31,14 @@
             this.btnOK = new System.Windows.Forms.Button();
             this.lbMoreComments = new System.Windows.Forms.Label();
             this.gbFlags = new System.Windows.Forms.GroupBox();
+            this.chbxASMDebug = new System.Windows.Forms.CheckBox();
+            this.lbASMDebug = new System.Windows.Forms.Label();
             this.chbxOptAsm = new System.Windows.Forms.CheckBox();
             this.lbOptAsm = new System.Windows.Forms.Label();
             this.chbxDisableErrorPop = new System.Windows.Forms.CheckBox();
             this.lbShowErrorForm = new System.Windows.Forms.Label();
             this.chbxMoreComments = new System.Windows.Forms.CheckBox();
             this.btnOptOptions = new System.Windows.Forms.Button();
-            this.lbASMDebug = new System.Windows.Forms.Label();
-            this.chbxASMDebug = new System.Windows.Forms.CheckBox();
             this.gbFlags.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -79,6 +79,27 @@
             this.gbFlags.TabIndex = 2;
             this.gbFlags.TabStop = false;
             this.gbFlags.Text = "Compiler Flags";
+            // 
+            // chbxASMDebug
+            // 
+            this.chbxASMDebug.AutoSize = true;
+            this.chbxASMDebug.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.chbxASMDebug.Location = new System.Drawing.Point(174, 120);
+            this.chbxASMDebug.Name = "chbxASMDebug";
+            this.chbxASMDebug.Size = new System.Drawing.Size(57, 17);
+            this.chbxASMDebug.TabIndex = 9;
+            this.chbxASMDebug.Text = "Enable";
+            this.chbxASMDebug.UseVisualStyleBackColor = true;
+            this.chbxASMDebug.CheckedChanged += new System.EventHandler(this.chbxASMDebug_CheckedChanged);
+            // 
+            // lbASMDebug
+            // 
+            this.lbASMDebug.AutoSize = true;
+            this.lbASMDebug.Location = new System.Drawing.Point(16, 124);
+            this.lbASMDebug.Name = "lbASMDebug";
+            this.lbASMDebug.Size = new System.Drawing.Size(65, 13);
+            this.lbASMDebug.TabIndex = 8;
+            this.lbASMDebug.Text = "ASM Debug";
             // 
             // chbxOptAsm
             // 
@@ -145,31 +166,11 @@
             this.btnOptOptions.UseVisualStyleBackColor = true;
             this.btnOptOptions.Click += new System.EventHandler(this.btnOptOptions_Click);
             // 
-            // lbASMDebug
-            // 
-            this.lbASMDebug.AutoSize = true;
-            this.lbASMDebug.Location = new System.Drawing.Point(16, 124);
-            this.lbASMDebug.Name = "lbASMDebug";
-            this.lbASMDebug.Size = new System.Drawing.Size(65, 13);
-            this.lbASMDebug.TabIndex = 8;
-            this.lbASMDebug.Text = "ASM Debug";
-            // 
-            // chbxASMDebug
-            // 
-            this.chbxASMDebug.AutoSize = true;
-            this.chbxASMDebug.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.chbxASMDebug.Location = new System.Drawing.Point(174, 120);
-            this.chbxASMDebug.Name = "chbxASMDebug";
-            this.chbxASMDebug.Size = new System.Drawing.Size(57, 17);
-            this.chbxASMDebug.TabIndex = 9;
-            this.chbxASMDebug.Text = "Enable";
-            this.chbxASMDebug.UseVisualStyleBackColor = true;
-            this.chbxASMDebug.CheckedChanged += new System.EventHandler(this.chbxASMDebug_CheckedChanged);
-            // 
             // FlagsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(284, 262);
             this.Controls.Add(this.btnOptOptions);
             this.Controls.Add(this.gbFlags);

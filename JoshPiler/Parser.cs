@@ -152,48 +152,62 @@ namespace JoshPiler
             // Consume ID token
             m_tok = m_Tknzr.NextToken();
 
-            Match(Token.TOKENTYPE.LEFT_PAREN);
-            // check for passed by reference
-            //  if VAR token exists then parameters are reference types
-            if (m_tok.m_tokType == Token.TOKENTYPE.VAR)
+            // Parse arguments if any
+            if (m_tok.m_tokType == Token.TOKENTYPE.LEFT_PAREN)
             {
-                // Add PROC to symbol table to calling scope
-                m_SymTable.AddSymbol(new Symbol(tkProcID.m_strName, iCallScope, Symbol.SYMBOL_TYPE.TYPE_REFPROC,
-                    Symbol.STORAGE_TYPE.STORE_NONE, Symbol.PARAMETER_TYPE.LOCAL_VAR, 0));
+                m_tok = m_Tknzr.NextToken();
 
-                // Create new scope for procedure
-                m_SymTable.AddScope();
+                // check for passed by reference
+                //  if VAR token exists then parameters are reference types
+                if (m_tok.m_tokType == Token.TOKENTYPE.VAR)
+                {
+                    // Add PROC to symbol table to calling scope
+                    m_SymTable.AddSymbol(new Symbol(tkProcID.m_strName, iCallScope, Symbol.SYMBOL_TYPE.TYPE_REFPROC,
+                        Symbol.STORAGE_TYPE.STORE_NONE, Symbol.PARAMETER_TYPE.LOCAL_VAR, 0));
 
-                m_tok = m_Tknzr.NextToken(); // consume VAR token
-                while (m_tok.m_tokType != Token.TOKENTYPE.RIGHT_PAREN)
-                    VarDef(m_SymTable.ActiveScope, 4, Symbol.PARAMETER_TYPE.REF_PARM);
+                    // Create new scope for procedure
+                    m_SymTable.AddScope();
 
-                // Add Proc sym with TYPE_REFPROC so that we know the parameters are of reference type
-                //  in the ID() function. Do so by overwriting the symbol
+                    m_tok = m_Tknzr.NextToken(); // consume VAR token
+                    while (m_tok.m_tokType != Token.TOKENTYPE.RIGHT_PAREN)
+                        VarDef(m_SymTable.ActiveScope, 4, Symbol.PARAMETER_TYPE.REF_PARM);
+
+                    // Add Proc sym with TYPE_REFPROC so that we know the parameters are of reference type
+                    //  in the ID() function. Do so by overwriting the symbol
+                }
+                // Pass by value
+                else
+                {
+                    // Add PROC to symbol table to calling scope
+                    m_SymTable.AddSymbol(new Symbol(tkProcID.m_strName, iCallScope, Symbol.SYMBOL_TYPE.TYPE_PROC,
+                        Symbol.STORAGE_TYPE.STORE_NONE, Symbol.PARAMETER_TYPE.LOCAL_VAR, 0));
+
+                    // Create new scope for procedure
+                    m_SymTable.AddScope();
+
+                    // Parse procedure paramaters (arguments)
+                    while (m_tok.m_tokType != Token.TOKENTYPE.RIGHT_PAREN)          // while not )
+                        VarDef(m_SymTable.ActiveScope, 4, Symbol.PARAMETER_TYPE.VAL_PARM);   // baseoffset for scope starts at 4
+                }
+                m_tok = m_Tknzr.NextToken();     // Consume )
             }
-            // Pass by value
-            else 
-            {
-                // Add PROC to symbol table to calling scope
-                m_SymTable.AddSymbol(new Symbol(tkProcID.m_strName, iCallScope, Symbol.SYMBOL_TYPE.TYPE_PROC,
-                    Symbol.STORAGE_TYPE.STORE_NONE, Symbol.PARAMETER_TYPE.LOCAL_VAR, 0));
-
-                // Create new scope for procedure
-                m_SymTable.AddScope();
-
-                // Parse procedure paramaters (arguments)
-                while (m_tok.m_tokType != Token.TOKENTYPE.RIGHT_PAREN)          // while not )
-                    VarDef(m_SymTable.ActiveScope, 4, Symbol.PARAMETER_TYPE.VAL_PARM);   // baseoffset for scope starts at 4
-            }
-            m_tok = m_Tknzr.NextToken();     // Consume )
-
             Match(Token.TOKENTYPE.SEMI_COLON);
 
-            // CONST
-            if (m_tok.m_tokType == Token.TOKENTYPE.CONST) Const(m_SymTable.ActiveScope);
 
-            // VAR  Parse PROCEDURE's local vars
-            if (m_tok.m_tokType == Token.TOKENTYPE.VAR) Vars(m_SymTable.ActiveScope, 4);
+            while (m_tok.m_tokType != Token.TOKENTYPE.BEGIN)
+            {
+                switch (m_tok.m_tokType)
+                {
+                    // CONST
+                    case Token.TOKENTYPE.CONST:
+                        Const(m_SymTable.ActiveScope);
+                        break;
+                    // VAR  Parse PROCEDURE's local vars
+                    case Token.TOKENTYPE.VAR:
+                        Vars(m_SymTable.ActiveScope, 4);
+                        break;
+                }
+            }
 
             // Parse PROCEDURE's contents
             m_Em.asm(string.Format("\r\n\r\n;// START Procedure: {0}", tkProcID.m_strName));
@@ -684,6 +698,10 @@ namespace JoshPiler
             //m_tok = m_Tknzr.NextToken();
         } // WRINT()
 
+        /// <summary>
+        /// Parse/emit procedure call
+        /// </summary>
+        /// <param name="sym"></param>
         private void ProcID(Symbol sym)
         {
             // ***** PROCEDURE ***** //
@@ -693,7 +711,8 @@ namespace JoshPiler
             m_tok = m_Tknzr.NextToken();
             Match(Token.TOKENTYPE.LEFT_PAREN);
 
-            // Parse arguments and prep for procedure call
+            // Parse arguments into list of token lists
+            //  each list in the token list is an argument for the function being parsed
             List<List<Token>> lslsArgs = new List<List<Token>>(); // hold the arguments, list of token (expression) lists
             for (; m_tok.m_tokType != Token.TOKENTYPE.SEMI_COLON; m_tok = m_Tknzr.NextToken())
             {
@@ -705,44 +724,34 @@ namespace JoshPiler
                 lslsArgs.Add(lsArg); // add argument expression to list of arg expressions
                 ++iArgCount; // used when restoring the stack
             } // Get arguments
+
             // Must push arguments in reverse order
             for (int i = iArgCount; i > 0; --i)
             {
-                // if proc is reference then push just BP-Off not [BP-Off]
+                // if proc is reference then push pointer to variable
                 if (sym.SymType == Symbol.SYMBOL_TYPE.TYPE_REFPROC)
                 {
-                    Symbol syRef = FindSymbol(lslsArgs[i - 1][0].m_strName);
-
-                    switch (syRef.SymType)
+                    Symbol symRefArg = m_SymTable.FindSymbol(lslsArgs[i - 1][0].m_strName);
+                    
+                    m_Em.asm(";// Push REF addresses for: " + symRefArg.Name + " in PROCEDURE: " + sym.Name);
+                    m_Em.asm(";// PARAM: " + symRefArg.ParamType.ToString());
+                    // int
+                    if (lslsArgs[i-1].Count == 1)
+                        m_Em.CalcIntAddress(symRefArg.Offset.ToString(), symRefArg.ParamType);
+                    // array
+                    else
                     {
-                        case Symbol.SYMBOL_TYPE.TYPE_ARRAY:
-                        case Symbol.SYMBOL_TYPE.TYPE_SIMPLE:
-                            m_Em.asm("  movzx EAX, BP     ; mov zero extend");
-                            m_Em.Sub("EAX", syRef.Offset.ToString());
-                            m_Em.pushReg("EAX"); 		   // final address of variable
-                            continue;
-                        //case Symbol.SYMBOL_TYPE.TYPE_ARRAY:
-                        //    // Check if whole array or just an value in the array passed in
-                        //    if (lslsArgs[i - 1].Count == 1) // whole array, just send in offset, make sure to adjust whole offset
-                        //    {
-                        //        m_Em.asm("  movzx EAX, BP     ; mov zero extend");
-                        //        m_Em.Sub("EAX", syRef.Offset.ToString());
-                        //        m_Em.pushReg("EAX"); 		   // final address of variable
-                        //    }
-                        //    else // value in array
-                        //    {
-                        //        // calculate index referenced [ exp ]
-                        //        EvalPostFix(InFixToPostFix(lslsArgs[i - 1]));
-                        //        m_Em.iMul("EAX", "4");           // calc offset => index*sizeof(int)
-                        //        m_Em.movReg("EBX", "EAX");
-                        //        m_Em.asm("  movzx EAX, BP     ; mov zero extend");
-                        //        m_Em.Sub("EAX", "EBX");
-                        //        m_Em.pushReg("EAX");
-                        //    }
-                        //    continue;
-                        default:
-                            break;
+                        // Evaluate index
+                        List<Token> ltIndex = lslsArgs[i-1].GetRange(2, lslsArgs[i-1].Count - 3);
+
+                        EvalPostFix(InFixToPostFix(ltIndex));
+
+                        m_Em.CalcArrayAddress(symRefArg.BaseOffset.ToString(), symRefArg.Offset.ToString(), 
+                            symRefArg.ParamType, ";///ProcID Offset: ");
                     }
+
+                    m_Em.pushReg("EAX");
+                    continue;
                 }
                 // Get value into EAX then push onto stack
                 EvalPostFix(InFixToPostFix(lslsArgs[i - 1]));
@@ -755,8 +764,12 @@ namespace JoshPiler
             m_Em.asm(string.Format("call     {0}     ; PROCEDURE {0}", sym.Name));
 
             m_Em.Add("SP", (lslsArgs.Count * 4).ToString());
-        }
+        } // ProcID
 
+        /// <summary>
+        /// Parse array on left side of :=. Address is pushed onto the stack
+        /// </summary>
+        /// <param name="sym"></param>
         private void ArrayID(Symbol sym)
         {
             // ***** ARRAY  ID() ***** //
@@ -772,16 +785,13 @@ namespace JoshPiler
             EvalPostFix(InFixToPostFix(lsIndex));
 
             // calculate address
-            m_Em.CalcArrayAddress(sym.ArrayEnd.ToString(),
-             sym.Offset.ToString(),
-             (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR),
-             "ID() ADDRESS: ");
+            m_Em.CalcArrayAddress(sym.ArrayEnd.ToString(), sym.Offset.ToString(), sym.ParamType, "ID() ADDRESS: ");
 
             // push for assignment
             m_Em.pushReg("EAX");
 
             Match(Token.TOKENTYPE.RIGHT_BRACK);
-        }
+        } // ArrayID
 
         /// <summary>
         /// Parse Assignment function
@@ -814,7 +824,6 @@ namespace JoshPiler
             else // type INT
             {
                 m_Em.CalcIntAddress(sym.Offset.ToString(), sym.ParamType);
-                // Push address
                 m_Em.pushReg("EAX");
             }
 
@@ -833,11 +842,11 @@ namespace JoshPiler
 
             // Value to be stored should be in EAX
             //  store the value at proper place:
-            m_Em.popReg("ECX");                   // get address from stack
+            m_Em.popReg("EDI");                   // get address from stack
             //if (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR)
             //    m_Em.movReg(string.Format("[BP-{0}]", sym.Offset), "EAX");
             //else
-             m_Em.movReg("[ECX]", "EAX");
+             m_Em.movReg("[EDI]", "EAX");
             Match(Token.TOKENTYPE.SEMI_COLON);
         } // ID()
 
@@ -1353,11 +1362,10 @@ namespace JoshPiler
                                 EvalPostFix(ltIndex);
 
                                 // Calculate address
-                                m_Em.CalcArrayAddress(sym.ArrayEnd.ToString(), sym.Offset.ToString(), 
-                                    (sym.ParamType == Symbol.PARAMETER_TYPE.LOCAL_VAR),
-                                    "EVALPOSTFIX ADDRESS: ");
+                                m_Em.CalcArrayAddress(sym.ArrayEnd.ToString(), sym.Offset.ToString(),
+                                    sym.ParamType, "EVALPOSTFIX ADDRESS: ");
 
-                                m_Em.movReg("EBX", "[EAX]");   // value at address in ECX in EAX
+                                m_Em.movReg("EBX", "[EAX]");   
                                 m_Em.pushReg("EBX");
                                 if (c_bParserASMDebug) m_Em.asm(";;;; END EVAL ARRAY");
                                 break;
