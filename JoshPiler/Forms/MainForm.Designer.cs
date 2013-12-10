@@ -50,18 +50,14 @@
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.compileFlagsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabProcLst = new System.Windows.Forms.TabPage();
-            this.lineNumbersForRichText4 = new LineNumbersControlForRichTextBox.LineNumbersForRichText();
             this.richProcListInc = new System.Windows.Forms.RichTextBox();
             this.tabStrInc = new System.Windows.Forms.TabPage();
-            this.lineNumbersForRichText3 = new LineNumbersControlForRichTextBox.LineNumbersForRichText();
             this.richStringInc = new System.Windows.Forms.RichTextBox();
             this.tabSymTabl = new System.Windows.Forms.TabPage();
             this.richSymTable = new System.Windows.Forms.RichTextBox();
             this.tabTokens = new System.Windows.Forms.TabPage();
-            this.lineNumbersForRichText2 = new LineNumbersControlForRichTextBox.LineNumbersForRichText();
             this.richToken = new System.Windows.Forms.RichTextBox();
             this.tabSRCview = new System.Windows.Forms.TabPage();
-            this.lineNumbersForRichText1 = new LineNumbersControlForRichTextBox.LineNumbersForRichText();
             this.richSourceBox = new System.Windows.Forms.RichTextBox();
             this.tabsMain = new System.Windows.Forms.TabControl();
             this.stStatusStrip = new System.Windows.Forms.StatusStrip();
@@ -72,6 +68,10 @@
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.getCharToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetCharToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lineNumbersForRichText1 = new LineNumbersControlForRichTextBox.LineNumbersForRichText();
+            this.lineNumbersForRichText2 = new LineNumbersControlForRichTextBox.LineNumbersForRichText();
+            this.lineNumbersForRichText3 = new LineNumbersControlForRichTextBox.LineNumbersForRichText();
+            this.lineNumbersForRichText4 = new LineNumbersControlForRichTextBox.LineNumbersForRichText();
             this.menuStrip1.SuspendLayout();
             this.tabProcLst.SuspendLayout();
             this.tabStrInc.SuspendLayout();
@@ -163,8 +163,8 @@
             // setDefaultFolderToolStripMenuItem
             // 
             this.setDefaultFolderToolStripMenuItem.Name = "setDefaultFolderToolStripMenuItem";
-            this.setDefaultFolderToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt) 
-            | System.Windows.Forms.Keys.M)));
+            this.setDefaultFolderToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt)
+                        | System.Windows.Forms.Keys.M)));
             this.setDefaultFolderToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
             this.setDefaultFolderToolStripMenuItem.Text = "Set Default Folder";
             this.setDefaultFolderToolStripMenuItem.Click += new System.EventHandler(this.setDefaultFolderToolStripMenuItem_Click);
@@ -180,8 +180,8 @@
             // saveErrorLogToolStripMenuItem
             // 
             this.saveErrorLogToolStripMenuItem.Name = "saveErrorLogToolStripMenuItem";
-            this.saveErrorLogToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
-            | System.Windows.Forms.Keys.S)));
+            this.saveErrorLogToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
+                        | System.Windows.Forms.Keys.S)));
             this.saveErrorLogToolStripMenuItem.Size = new System.Drawing.Size(235, 22);
             this.saveErrorLogToolStripMenuItem.Text = "Save Error Log";
             this.saveErrorLogToolStripMenuItem.Click += new System.EventHandler(this.saveErrorLogToolStripMenuItem_Click);
@@ -232,8 +232,8 @@
             // testSymbolTableToolStripMenuItem
             // 
             this.testSymbolTableToolStripMenuItem.Name = "testSymbolTableToolStripMenuItem";
-            this.testSymbolTableToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt) 
-            | System.Windows.Forms.Keys.S)));
+            this.testSymbolTableToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Alt)
+                        | System.Windows.Forms.Keys.S)));
             this.testSymbolTableToolStripMenuItem.Size = new System.Drawing.Size(234, 22);
             this.testSymbolTableToolStripMenuItem.Text = "Test Symbol Table";
             this.testSymbolTableToolStripMenuItem.Click += new System.EventHandler(this.testSymbolTableToolStripMenuItem_Click);
@@ -273,49 +273,11 @@
             this.tabProcLst.Text = "proclist.inc";
             this.tabProcLst.UseVisualStyleBackColor = true;
             // 
-            // lineNumbersForRichText4
-            // 
-            this.lineNumbersForRichText4.AutoSizing = true;
-            this.lineNumbersForRichText4.BackgroundGradientAlphaColor = System.Drawing.Color.Transparent;
-            this.lineNumbersForRichText4.BackgroundGradientBetaColor = System.Drawing.Color.Transparent;
-            this.lineNumbersForRichText4.BackgroundGradientDirection = System.Drawing.Drawing2D.LinearGradientMode.Horizontal;
-            this.lineNumbersForRichText4.BorderLinesColor = System.Drawing.Color.Black;
-            this.lineNumbersForRichText4.BorderLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
-            this.lineNumbersForRichText4.BorderLinesThickness = 1F;
-            this.lineNumbersForRichText4.DockSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Left;
-            this.lineNumbersForRichText4.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lineNumbersForRichText4.GridLinesColor = System.Drawing.Color.Black;
-            this.lineNumbersForRichText4.GridLinesStyle = System.Drawing.Drawing2D.DashStyle.Dot;
-            this.lineNumbersForRichText4.GridLinesThickness = 1F;
-            this.lineNumbersForRichText4.LineNumbersAlignment = System.Drawing.ContentAlignment.TopRight;
-            this.lineNumbersForRichText4.LineNumbersAntiAlias = true;
-            this.lineNumbersForRichText4.LineNumbersAsHexadecimal = false;
-            this.lineNumbersForRichText4.LineNumbersClippedByItemRectangle = true;
-            this.lineNumbersForRichText4.LineNumbersLeadingZeroes = true;
-            this.lineNumbersForRichText4.LineNumbersOffset = new System.Drawing.Size(0, 0);
-            this.lineNumbersForRichText4.Location = new System.Drawing.Point(23, 3);
-            this.lineNumbersForRichText4.Margin = new System.Windows.Forms.Padding(0);
-            this.lineNumbersForRichText4.MarginLinesColor = System.Drawing.Color.Black;
-            this.lineNumbersForRichText4.MarginLinesSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Right;
-            this.lineNumbersForRichText4.MarginLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
-            this.lineNumbersForRichText4.MarginLinesThickness = 1F;
-            this.lineNumbersForRichText4.Name = "lineNumbersForRichText4";
-            this.lineNumbersForRichText4.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.lineNumbersForRichText4.ParentRichTextBox = this.richProcListInc;
-            this.lineNumbersForRichText4.SeeThroughMode = false;
-            this.lineNumbersForRichText4.ShowBackgroundGradient = false;
-            this.lineNumbersForRichText4.ShowBorderLines = false;
-            this.lineNumbersForRichText4.ShowGridLines = false;
-            this.lineNumbersForRichText4.ShowLineNumbers = true;
-            this.lineNumbersForRichText4.ShowMarginLines = true;
-            this.lineNumbersForRichText4.Size = new System.Drawing.Size(20, 508);
-            this.lineNumbersForRichText4.TabIndex = 4;
-            // 
             // richProcListInc
             // 
-            this.richProcListInc.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.richProcListInc.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.richProcListInc.BackColor = System.Drawing.Color.White;
             this.richProcListInc.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richProcListInc.Location = new System.Drawing.Point(44, 3);
@@ -336,49 +298,11 @@
             this.tabStrInc.Text = "string.inc";
             this.tabStrInc.UseVisualStyleBackColor = true;
             // 
-            // lineNumbersForRichText3
-            // 
-            this.lineNumbersForRichText3.AutoSizing = true;
-            this.lineNumbersForRichText3.BackgroundGradientAlphaColor = System.Drawing.Color.Transparent;
-            this.lineNumbersForRichText3.BackgroundGradientBetaColor = System.Drawing.Color.Transparent;
-            this.lineNumbersForRichText3.BackgroundGradientDirection = System.Drawing.Drawing2D.LinearGradientMode.Horizontal;
-            this.lineNumbersForRichText3.BorderLinesColor = System.Drawing.Color.Black;
-            this.lineNumbersForRichText3.BorderLinesStyle = System.Drawing.Drawing2D.DashStyle.Dot;
-            this.lineNumbersForRichText3.BorderLinesThickness = 1F;
-            this.lineNumbersForRichText3.DockSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Left;
-            this.lineNumbersForRichText3.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lineNumbersForRichText3.GridLinesColor = System.Drawing.Color.Black;
-            this.lineNumbersForRichText3.GridLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
-            this.lineNumbersForRichText3.GridLinesThickness = 1F;
-            this.lineNumbersForRichText3.LineNumbersAlignment = System.Drawing.ContentAlignment.TopRight;
-            this.lineNumbersForRichText3.LineNumbersAntiAlias = true;
-            this.lineNumbersForRichText3.LineNumbersAsHexadecimal = false;
-            this.lineNumbersForRichText3.LineNumbersClippedByItemRectangle = true;
-            this.lineNumbersForRichText3.LineNumbersLeadingZeroes = true;
-            this.lineNumbersForRichText3.LineNumbersOffset = new System.Drawing.Size(0, 0);
-            this.lineNumbersForRichText3.Location = new System.Drawing.Point(14, 3);
-            this.lineNumbersForRichText3.Margin = new System.Windows.Forms.Padding(0);
-            this.lineNumbersForRichText3.MarginLinesColor = System.Drawing.Color.Black;
-            this.lineNumbersForRichText3.MarginLinesSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Right;
-            this.lineNumbersForRichText3.MarginLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
-            this.lineNumbersForRichText3.MarginLinesThickness = 1F;
-            this.lineNumbersForRichText3.Name = "lineNumbersForRichText3";
-            this.lineNumbersForRichText3.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.lineNumbersForRichText3.ParentRichTextBox = this.richStringInc;
-            this.lineNumbersForRichText3.SeeThroughMode = false;
-            this.lineNumbersForRichText3.ShowBackgroundGradient = false;
-            this.lineNumbersForRichText3.ShowBorderLines = false;
-            this.lineNumbersForRichText3.ShowGridLines = false;
-            this.lineNumbersForRichText3.ShowLineNumbers = true;
-            this.lineNumbersForRichText3.ShowMarginLines = true;
-            this.lineNumbersForRichText3.Size = new System.Drawing.Size(20, 508);
-            this.lineNumbersForRichText3.TabIndex = 4;
-            // 
             // richStringInc
             // 
-            this.richStringInc.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.richStringInc.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.richStringInc.BackColor = System.Drawing.Color.White;
             this.richStringInc.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richStringInc.Location = new System.Drawing.Point(35, 3);
@@ -400,9 +324,9 @@
             // 
             // richSymTable
             // 
-            this.richSymTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.richSymTable.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.richSymTable.BackColor = System.Drawing.Color.White;
             this.richSymTable.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richSymTable.Location = new System.Drawing.Point(3, 3);
@@ -424,49 +348,11 @@
             this.tabTokens.Text = "Token List";
             this.tabTokens.UseVisualStyleBackColor = true;
             // 
-            // lineNumbersForRichText2
-            // 
-            this.lineNumbersForRichText2.AutoSizing = true;
-            this.lineNumbersForRichText2.BackgroundGradientAlphaColor = System.Drawing.Color.Transparent;
-            this.lineNumbersForRichText2.BackgroundGradientBetaColor = System.Drawing.Color.Transparent;
-            this.lineNumbersForRichText2.BackgroundGradientDirection = System.Drawing.Drawing2D.LinearGradientMode.Horizontal;
-            this.lineNumbersForRichText2.BorderLinesColor = System.Drawing.Color.Black;
-            this.lineNumbersForRichText2.BorderLinesStyle = System.Drawing.Drawing2D.DashStyle.Dot;
-            this.lineNumbersForRichText2.BorderLinesThickness = 1F;
-            this.lineNumbersForRichText2.DockSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Left;
-            this.lineNumbersForRichText2.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lineNumbersForRichText2.GridLinesColor = System.Drawing.Color.Black;
-            this.lineNumbersForRichText2.GridLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
-            this.lineNumbersForRichText2.GridLinesThickness = 1F;
-            this.lineNumbersForRichText2.LineNumbersAlignment = System.Drawing.ContentAlignment.TopRight;
-            this.lineNumbersForRichText2.LineNumbersAntiAlias = true;
-            this.lineNumbersForRichText2.LineNumbersAsHexadecimal = false;
-            this.lineNumbersForRichText2.LineNumbersClippedByItemRectangle = true;
-            this.lineNumbersForRichText2.LineNumbersLeadingZeroes = true;
-            this.lineNumbersForRichText2.LineNumbersOffset = new System.Drawing.Size(0, 0);
-            this.lineNumbersForRichText2.Location = new System.Drawing.Point(13, 3);
-            this.lineNumbersForRichText2.Margin = new System.Windows.Forms.Padding(0);
-            this.lineNumbersForRichText2.MarginLinesColor = System.Drawing.Color.Black;
-            this.lineNumbersForRichText2.MarginLinesSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Right;
-            this.lineNumbersForRichText2.MarginLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
-            this.lineNumbersForRichText2.MarginLinesThickness = 1F;
-            this.lineNumbersForRichText2.Name = "lineNumbersForRichText2";
-            this.lineNumbersForRichText2.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.lineNumbersForRichText2.ParentRichTextBox = this.richToken;
-            this.lineNumbersForRichText2.SeeThroughMode = false;
-            this.lineNumbersForRichText2.ShowBackgroundGradient = false;
-            this.lineNumbersForRichText2.ShowBorderLines = false;
-            this.lineNumbersForRichText2.ShowGridLines = false;
-            this.lineNumbersForRichText2.ShowLineNumbers = true;
-            this.lineNumbersForRichText2.ShowMarginLines = true;
-            this.lineNumbersForRichText2.Size = new System.Drawing.Size(20, 508);
-            this.lineNumbersForRichText2.TabIndex = 4;
-            // 
             // richToken
             // 
-            this.richToken.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.richToken.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.richToken.BackColor = System.Drawing.Color.White;
             this.richToken.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richToken.Location = new System.Drawing.Point(34, 3);
@@ -488,49 +374,11 @@
             this.tabSRCview.Text = "Source";
             this.tabSRCview.UseVisualStyleBackColor = true;
             // 
-            // lineNumbersForRichText1
-            // 
-            this.lineNumbersForRichText1.AutoSizing = true;
-            this.lineNumbersForRichText1.BackgroundGradientAlphaColor = System.Drawing.Color.Transparent;
-            this.lineNumbersForRichText1.BackgroundGradientBetaColor = System.Drawing.Color.Transparent;
-            this.lineNumbersForRichText1.BackgroundGradientDirection = System.Drawing.Drawing2D.LinearGradientMode.Horizontal;
-            this.lineNumbersForRichText1.BorderLinesColor = System.Drawing.Color.Black;
-            this.lineNumbersForRichText1.BorderLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
-            this.lineNumbersForRichText1.BorderLinesThickness = 1F;
-            this.lineNumbersForRichText1.DockSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Left;
-            this.lineNumbersForRichText1.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lineNumbersForRichText1.GridLinesColor = System.Drawing.Color.Black;
-            this.lineNumbersForRichText1.GridLinesStyle = System.Drawing.Drawing2D.DashStyle.Dot;
-            this.lineNumbersForRichText1.GridLinesThickness = 1F;
-            this.lineNumbersForRichText1.LineNumbersAlignment = System.Drawing.ContentAlignment.TopRight;
-            this.lineNumbersForRichText1.LineNumbersAntiAlias = true;
-            this.lineNumbersForRichText1.LineNumbersAsHexadecimal = false;
-            this.lineNumbersForRichText1.LineNumbersClippedByItemRectangle = true;
-            this.lineNumbersForRichText1.LineNumbersLeadingZeroes = true;
-            this.lineNumbersForRichText1.LineNumbersOffset = new System.Drawing.Size(0, 0);
-            this.lineNumbersForRichText1.Location = new System.Drawing.Point(13, 3);
-            this.lineNumbersForRichText1.Margin = new System.Windows.Forms.Padding(0);
-            this.lineNumbersForRichText1.MarginLinesColor = System.Drawing.Color.Black;
-            this.lineNumbersForRichText1.MarginLinesSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Right;
-            this.lineNumbersForRichText1.MarginLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
-            this.lineNumbersForRichText1.MarginLinesThickness = 1F;
-            this.lineNumbersForRichText1.Name = "lineNumbersForRichText1";
-            this.lineNumbersForRichText1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
-            this.lineNumbersForRichText1.ParentRichTextBox = this.richSourceBox;
-            this.lineNumbersForRichText1.SeeThroughMode = false;
-            this.lineNumbersForRichText1.ShowBackgroundGradient = false;
-            this.lineNumbersForRichText1.ShowBorderLines = false;
-            this.lineNumbersForRichText1.ShowGridLines = false;
-            this.lineNumbersForRichText1.ShowLineNumbers = true;
-            this.lineNumbersForRichText1.ShowMarginLines = true;
-            this.lineNumbersForRichText1.Size = new System.Drawing.Size(20, 508);
-            this.lineNumbersForRichText1.TabIndex = 2;
-            // 
             // richSourceBox
             // 
-            this.richSourceBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.richSourceBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.richSourceBox.BackColor = System.Drawing.Color.White;
             this.richSourceBox.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richSourceBox.Location = new System.Drawing.Point(34, 3);
@@ -542,9 +390,9 @@
             // 
             // tabsMain
             // 
-            this.tabsMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabsMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.tabsMain.Controls.Add(this.tabSRCview);
             this.tabsMain.Controls.Add(this.tabTokens);
             this.tabsMain.Controls.Add(this.tabSymTabl);
@@ -558,8 +406,8 @@
             // 
             // stStatusStrip
             // 
-            this.stStatusStrip.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.stStatusStrip.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.stStatusStrip.AutoSize = false;
             this.stStatusStrip.BackColor = System.Drawing.Color.Transparent;
             this.stStatusStrip.Dock = System.Windows.Forms.DockStyle.None;
@@ -626,6 +474,158 @@
             this.resetCharToolStripMenuItem.Text = "Reset Char";
             this.resetCharToolStripMenuItem.Click += new System.EventHandler(this.resetCharToolStripMenuItem_Click);
             // 
+            // lineNumbersForRichText1
+            // 
+            this.lineNumbersForRichText1.AutoSizing = true;
+            this.lineNumbersForRichText1.BackgroundGradientAlphaColor = System.Drawing.Color.Transparent;
+            this.lineNumbersForRichText1.BackgroundGradientBetaColor = System.Drawing.Color.Transparent;
+            this.lineNumbersForRichText1.BackgroundGradientDirection = System.Drawing.Drawing2D.LinearGradientMode.Horizontal;
+            this.lineNumbersForRichText1.BorderLinesColor = System.Drawing.Color.Black;
+            this.lineNumbersForRichText1.BorderLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
+            this.lineNumbersForRichText1.BorderLinesThickness = 1F;
+            this.lineNumbersForRichText1.DockSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Left;
+            this.lineNumbersForRichText1.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lineNumbersForRichText1.GridLinesColor = System.Drawing.Color.Black;
+            this.lineNumbersForRichText1.GridLinesStyle = System.Drawing.Drawing2D.DashStyle.Dot;
+            this.lineNumbersForRichText1.GridLinesThickness = 1F;
+            this.lineNumbersForRichText1.LineNumbersAlignment = System.Drawing.ContentAlignment.TopRight;
+            this.lineNumbersForRichText1.LineNumbersAntiAlias = true;
+            this.lineNumbersForRichText1.LineNumbersAsHexadecimal = false;
+            this.lineNumbersForRichText1.LineNumbersClippedByItemRectangle = true;
+            this.lineNumbersForRichText1.LineNumbersLeadingZeroes = true;
+            this.lineNumbersForRichText1.LineNumbersOffset = new System.Drawing.Size(0, 0);
+            this.lineNumbersForRichText1.Location = new System.Drawing.Point(13, 3);
+            this.lineNumbersForRichText1.Margin = new System.Windows.Forms.Padding(0);
+            this.lineNumbersForRichText1.MarginLinesColor = System.Drawing.Color.Black;
+            this.lineNumbersForRichText1.MarginLinesSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Right;
+            this.lineNumbersForRichText1.MarginLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
+            this.lineNumbersForRichText1.MarginLinesThickness = 1F;
+            this.lineNumbersForRichText1.Name = "lineNumbersForRichText1";
+            this.lineNumbersForRichText1.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.lineNumbersForRichText1.ParentRichTextBox = this.richSourceBox;
+            this.lineNumbersForRichText1.SeeThroughMode = false;
+            this.lineNumbersForRichText1.ShowBackgroundGradient = false;
+            this.lineNumbersForRichText1.ShowBorderLines = false;
+            this.lineNumbersForRichText1.ShowGridLines = false;
+            this.lineNumbersForRichText1.ShowLineNumbers = true;
+            this.lineNumbersForRichText1.ShowMarginLines = true;
+            this.lineNumbersForRichText1.Size = new System.Drawing.Size(20, 508);
+            this.lineNumbersForRichText1.TabIndex = 2;
+            // 
+            // lineNumbersForRichText2
+            // 
+            this.lineNumbersForRichText2.AutoSizing = true;
+            this.lineNumbersForRichText2.BackgroundGradientAlphaColor = System.Drawing.Color.Transparent;
+            this.lineNumbersForRichText2.BackgroundGradientBetaColor = System.Drawing.Color.Transparent;
+            this.lineNumbersForRichText2.BackgroundGradientDirection = System.Drawing.Drawing2D.LinearGradientMode.Horizontal;
+            this.lineNumbersForRichText2.BorderLinesColor = System.Drawing.Color.Black;
+            this.lineNumbersForRichText2.BorderLinesStyle = System.Drawing.Drawing2D.DashStyle.Dot;
+            this.lineNumbersForRichText2.BorderLinesThickness = 1F;
+            this.lineNumbersForRichText2.DockSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Left;
+            this.lineNumbersForRichText2.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lineNumbersForRichText2.GridLinesColor = System.Drawing.Color.Black;
+            this.lineNumbersForRichText2.GridLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
+            this.lineNumbersForRichText2.GridLinesThickness = 1F;
+            this.lineNumbersForRichText2.LineNumbersAlignment = System.Drawing.ContentAlignment.TopRight;
+            this.lineNumbersForRichText2.LineNumbersAntiAlias = true;
+            this.lineNumbersForRichText2.LineNumbersAsHexadecimal = false;
+            this.lineNumbersForRichText2.LineNumbersClippedByItemRectangle = true;
+            this.lineNumbersForRichText2.LineNumbersLeadingZeroes = true;
+            this.lineNumbersForRichText2.LineNumbersOffset = new System.Drawing.Size(0, 0);
+            this.lineNumbersForRichText2.Location = new System.Drawing.Point(13, 3);
+            this.lineNumbersForRichText2.Margin = new System.Windows.Forms.Padding(0);
+            this.lineNumbersForRichText2.MarginLinesColor = System.Drawing.Color.Black;
+            this.lineNumbersForRichText2.MarginLinesSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Right;
+            this.lineNumbersForRichText2.MarginLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
+            this.lineNumbersForRichText2.MarginLinesThickness = 1F;
+            this.lineNumbersForRichText2.Name = "lineNumbersForRichText2";
+            this.lineNumbersForRichText2.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.lineNumbersForRichText2.ParentRichTextBox = this.richToken;
+            this.lineNumbersForRichText2.SeeThroughMode = false;
+            this.lineNumbersForRichText2.ShowBackgroundGradient = false;
+            this.lineNumbersForRichText2.ShowBorderLines = false;
+            this.lineNumbersForRichText2.ShowGridLines = false;
+            this.lineNumbersForRichText2.ShowLineNumbers = true;
+            this.lineNumbersForRichText2.ShowMarginLines = true;
+            this.lineNumbersForRichText2.Size = new System.Drawing.Size(20, 508);
+            this.lineNumbersForRichText2.TabIndex = 4;
+            // 
+            // lineNumbersForRichText3
+            // 
+            this.lineNumbersForRichText3.AutoSizing = true;
+            this.lineNumbersForRichText3.BackgroundGradientAlphaColor = System.Drawing.Color.Transparent;
+            this.lineNumbersForRichText3.BackgroundGradientBetaColor = System.Drawing.Color.Transparent;
+            this.lineNumbersForRichText3.BackgroundGradientDirection = System.Drawing.Drawing2D.LinearGradientMode.Horizontal;
+            this.lineNumbersForRichText3.BorderLinesColor = System.Drawing.Color.Black;
+            this.lineNumbersForRichText3.BorderLinesStyle = System.Drawing.Drawing2D.DashStyle.Dot;
+            this.lineNumbersForRichText3.BorderLinesThickness = 1F;
+            this.lineNumbersForRichText3.DockSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Left;
+            this.lineNumbersForRichText3.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lineNumbersForRichText3.GridLinesColor = System.Drawing.Color.Black;
+            this.lineNumbersForRichText3.GridLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
+            this.lineNumbersForRichText3.GridLinesThickness = 1F;
+            this.lineNumbersForRichText3.LineNumbersAlignment = System.Drawing.ContentAlignment.TopRight;
+            this.lineNumbersForRichText3.LineNumbersAntiAlias = true;
+            this.lineNumbersForRichText3.LineNumbersAsHexadecimal = false;
+            this.lineNumbersForRichText3.LineNumbersClippedByItemRectangle = true;
+            this.lineNumbersForRichText3.LineNumbersLeadingZeroes = true;
+            this.lineNumbersForRichText3.LineNumbersOffset = new System.Drawing.Size(0, 0);
+            this.lineNumbersForRichText3.Location = new System.Drawing.Point(14, 3);
+            this.lineNumbersForRichText3.Margin = new System.Windows.Forms.Padding(0);
+            this.lineNumbersForRichText3.MarginLinesColor = System.Drawing.Color.Black;
+            this.lineNumbersForRichText3.MarginLinesSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Right;
+            this.lineNumbersForRichText3.MarginLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
+            this.lineNumbersForRichText3.MarginLinesThickness = 1F;
+            this.lineNumbersForRichText3.Name = "lineNumbersForRichText3";
+            this.lineNumbersForRichText3.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.lineNumbersForRichText3.ParentRichTextBox = this.richStringInc;
+            this.lineNumbersForRichText3.SeeThroughMode = false;
+            this.lineNumbersForRichText3.ShowBackgroundGradient = false;
+            this.lineNumbersForRichText3.ShowBorderLines = false;
+            this.lineNumbersForRichText3.ShowGridLines = false;
+            this.lineNumbersForRichText3.ShowLineNumbers = true;
+            this.lineNumbersForRichText3.ShowMarginLines = true;
+            this.lineNumbersForRichText3.Size = new System.Drawing.Size(20, 508);
+            this.lineNumbersForRichText3.TabIndex = 4;
+            // 
+            // lineNumbersForRichText4
+            // 
+            this.lineNumbersForRichText4.AutoSizing = true;
+            this.lineNumbersForRichText4.BackgroundGradientAlphaColor = System.Drawing.Color.Transparent;
+            this.lineNumbersForRichText4.BackgroundGradientBetaColor = System.Drawing.Color.Transparent;
+            this.lineNumbersForRichText4.BackgroundGradientDirection = System.Drawing.Drawing2D.LinearGradientMode.Horizontal;
+            this.lineNumbersForRichText4.BorderLinesColor = System.Drawing.Color.Black;
+            this.lineNumbersForRichText4.BorderLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
+            this.lineNumbersForRichText4.BorderLinesThickness = 1F;
+            this.lineNumbersForRichText4.DockSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Left;
+            this.lineNumbersForRichText4.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lineNumbersForRichText4.GridLinesColor = System.Drawing.Color.Black;
+            this.lineNumbersForRichText4.GridLinesStyle = System.Drawing.Drawing2D.DashStyle.Dot;
+            this.lineNumbersForRichText4.GridLinesThickness = 1F;
+            this.lineNumbersForRichText4.LineNumbersAlignment = System.Drawing.ContentAlignment.TopRight;
+            this.lineNumbersForRichText4.LineNumbersAntiAlias = true;
+            this.lineNumbersForRichText4.LineNumbersAsHexadecimal = false;
+            this.lineNumbersForRichText4.LineNumbersClippedByItemRectangle = true;
+            this.lineNumbersForRichText4.LineNumbersLeadingZeroes = true;
+            this.lineNumbersForRichText4.LineNumbersOffset = new System.Drawing.Size(0, 0);
+            this.lineNumbersForRichText4.Location = new System.Drawing.Point(23, 3);
+            this.lineNumbersForRichText4.Margin = new System.Windows.Forms.Padding(0);
+            this.lineNumbersForRichText4.MarginLinesColor = System.Drawing.Color.Black;
+            this.lineNumbersForRichText4.MarginLinesSide = LineNumbersControlForRichTextBox.LineNumbersForRichText.LineNumberDockSide.Right;
+            this.lineNumbersForRichText4.MarginLinesStyle = System.Drawing.Drawing2D.DashStyle.Solid;
+            this.lineNumbersForRichText4.MarginLinesThickness = 1F;
+            this.lineNumbersForRichText4.Name = "lineNumbersForRichText4";
+            this.lineNumbersForRichText4.Padding = new System.Windows.Forms.Padding(0, 0, 2, 0);
+            this.lineNumbersForRichText4.ParentRichTextBox = this.richProcListInc;
+            this.lineNumbersForRichText4.SeeThroughMode = false;
+            this.lineNumbersForRichText4.ShowBackgroundGradient = false;
+            this.lineNumbersForRichText4.ShowBorderLines = false;
+            this.lineNumbersForRichText4.ShowGridLines = false;
+            this.lineNumbersForRichText4.ShowLineNumbers = true;
+            this.lineNumbersForRichText4.ShowMarginLines = true;
+            this.lineNumbersForRichText4.Size = new System.Drawing.Size(20, 508);
+            this.lineNumbersForRichText4.TabIndex = 4;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -638,6 +638,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(816, 638);
             this.Name = "MainForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "JoshPiler";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
